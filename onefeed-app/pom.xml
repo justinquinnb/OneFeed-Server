@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.jqb</groupId>
         <artifactId>onefeed</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>onefeed-app</artifactId>
@@ -64,7 +64,6 @@
         <dependency>
             <groupId>dev.jqb</groupId>
             <artifactId>onefeed-api</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -75,6 +74,14 @@
         <dependency>
             <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
         </dependency>
     </dependencies>
 
