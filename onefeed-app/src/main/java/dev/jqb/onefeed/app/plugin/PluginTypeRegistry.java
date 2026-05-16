@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.app.plugins;
+package dev.jqb.onefeed.app.plugin;
 
 import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.plugin.OneFeedPlugin;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PluginTypeRegistry {
     private static final Logger logger = LoggerFactory.getLogger(PluginTypeRegistry.class);
+
     private final Map<String, Class<?>> fqnToTypes = new ConcurrentHashMap<>();
     private final Map<String, List<String>> pluginIdToFqns = new ConcurrentHashMap<>();
 

@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.api.content;
 
-import dev.jqb.onefeed.api.feed.Feed;
+import dev.jqb.onefeed.api.feed.FeedInfo;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,7 +16,7 @@ public class Source {
     /**
      * The feed that the content originated from
      */
-    private Feed feed;
+    private FeedInfo feed;
 
     /**
      * The URL of the content resource on its feed's platform
@@ -30,7 +30,7 @@ public class Source {
      * @param feed the feed that the content originated from
      * @param url the URL for the specific piece of content
      */
-    public Source(Feed feed, String url) {
+    public Source(FeedInfo feed, String url) {
         this.feed = feed;
         this.url = url;
     }

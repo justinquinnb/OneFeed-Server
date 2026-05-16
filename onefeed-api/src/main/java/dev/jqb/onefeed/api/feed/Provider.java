@@ -23,7 +23,7 @@ public interface Provider<Out extends RawContent> {
      * @param amount the target amount of content to retrieve
      * @param filters the filters to try applying if supported by the API or best performed on the 
      *                {@link Out} content itself
-     * @param config a map of configuration options for this specific request
+     * @param config a map of feed-specific configuration options for this specific request
      *               
      * @return a {@link Mono} that emits a {@link FilteredContent} containing the retrieved content
      */

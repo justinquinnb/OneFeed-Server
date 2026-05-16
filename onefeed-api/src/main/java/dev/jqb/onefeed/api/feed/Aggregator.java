@@ -17,11 +17,11 @@ public interface Aggregator {
      * @param amount the target amount of content to return after all filters have been applied
      * @param feeds the feeds to aggregate content from
      * @param filters the filters to apply to the aggregated content, limiting the results
-     * @param config a map of configuration options for the provider to use, containing info like
-     *               API keys
+     * @param feedConfigs a map of feed names to {@link Provider}-specific configurations that should be
+     *               applied
      *
      * @return a list of all content that was retrieved, in descending order of creation timestamp
      */
-    List<NormalizedContent> aggregate(int amount, List<Feed> feeds,
-        List<ContentFilter<?>> filters, HashMap<String, String> config);
+    List<NormalizedContent> aggregate(int amount, List<Feed<?>> feeds,
+        List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs);
 }

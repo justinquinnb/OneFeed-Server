@@ -1,22 +1,13 @@
 package dev.jqb.onefeed.api.feed;
 
+import dev.jqb.onefeed.api.content.RawContent;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
- * Information about a single feed of content
- *
+ * A single feed of content from a single provider
  */
 @Getter
-@Setter
-@ToString
-public class Feed {
-
-    /**
-     * The unique identifier of the provider exposing the feed
-     */
-    private String providerId;
+public class Feed<Out extends RawContent> {
 
     /**
      * The name of the feed
@@ -24,27 +15,17 @@ public class Feed {
     private String name;
 
     /**
-     * The platform that the content is hosted on/comes from/has been posted to
+     * The provider of the feed
      */
-    private Platform platform;
+    private Provider<Out> provider;
 
     /**
-     * The author of the content
-     */
-    private Author author;
-
-    /**
-     * Creates a new {@code Feed} for the given {@code provider} and feed {@code name}.
-     *
-     * @param providerId the unique identifier of the provider exposing the feed
+     * Creates a new {@code Feed} of name {@code name} provided by the given {@code provider}.
      * @param name the name of the feed
-     * @param platform the platform the content is hosted on/comes from/has been posted to
-     * @param author the author of the content
+     * @param provider the provider that feed is accessible via
      */
-    public Feed(String providerId, String name, Platform platform, Author author) {
-        this.providerId = providerId;
+    public Feed(String name, Provider<Out> provider) {
         this.name = name;
-        this.platform = platform;
-        this.author = author;
+        this.provider = provider;
     }
 }

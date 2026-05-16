@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.app.plugins;
+package dev.jqb.onefeed.app.plugin;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;

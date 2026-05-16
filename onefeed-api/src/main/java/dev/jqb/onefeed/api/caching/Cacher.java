@@ -3,7 +3,7 @@ package dev.jqb.onefeed.api.caching;
 import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.feed.Author;
-import dev.jqb.onefeed.api.feed.Feed;
+import dev.jqb.onefeed.api.feed.FeedInfo;
 import dev.jqb.onefeed.api.feed.FilteredContent;
 import java.time.Instant;
 import java.util.List;
@@ -21,7 +21,7 @@ public interface Cacher {
      *
      * @return at most {@code amount} pieces of cached content from the desired feed
      */
-    FilteredContent<? extends Content> getMostRecentContent(Feed feed, int amount, List<ContentFilter<? extends Content>> filters);
+    FilteredContent<? extends Content> getMostRecentContent(FeedInfo feed, int amount, List<ContentFilter<? extends Content>> filters);
 
     /**
      * Gets the refresh timestamp of the content that hasn't been refreshed in the longest amount
@@ -34,7 +34,7 @@ public interface Cacher {
      *
      * @throws IllegalStateException if no content has been cached for the specified {@code feed}
      */
-    Instant getStalestContentRefreshTime(Feed feed) throws IllegalStateException;
+    Instant getStalestContentRefreshTime(FeedInfo feed) throws IllegalStateException;
 
     /**
      * Caches the given {@code content}.
@@ -53,7 +53,7 @@ public interface Cacher {
      *
      * @return the author of the desired {@code feed}
      */
-    Author getAuthor(Feed feed);
+    Author getAuthor(FeedInfo feed);
 
     /**
      * Gets the refresh timestamp of the author of the desired {@code feed}.
@@ -64,7 +64,7 @@ public interface Cacher {
      *
      * @throws IllegalStateException if no author has been cached for the specified {@code feed}
      */
-    Instant getAuthorRefreshTime(Feed feed) throws IllegalStateException;
+    Instant getAuthorRefreshTime(FeedInfo feed) throws IllegalStateException;
 
     /**
      * Caches the given {@code authors}.

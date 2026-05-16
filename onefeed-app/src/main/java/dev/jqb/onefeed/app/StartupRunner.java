@@ -4,7 +4,7 @@ import dev.jqb.onefeed.api.plugin.ScheduledTasks;
 import dev.jqb.onefeed.api.plugin.CronTask;
 import dev.jqb.onefeed.api.plugin.FixedDelayTask;
 import dev.jqb.onefeed.api.plugin.ScheduledTask;
-import dev.jqb.onefeed.app.plugins.OneFeedPluginManager;
+import dev.jqb.onefeed.app.plugin.OneFeedPluginManager;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,13 +94,11 @@ public class StartupRunner implements ApplicationRunner {
             Plugin plugin = pluginWrapper.getPlugin();
             if (plugin instanceof ScheduledTasks) {
                 List<ScheduledTask> pluginTasks = ((ScheduledTasks) plugin).getScheduledTasks();
-                logger.debug("Found {} tasks for plugin \"{}\":",
-                    pluginTasks.size(), plugin.getClass().getSimpleName());
 
                 // Collect all the plugin's tasks
                 for (ScheduledTask task : pluginTasks) {
                     task.setRequester(pluginWrapper);
-                    logger.debug("{}", task.getName());
+                    logger.debug("Found task for \"{}\": {}", pluginWrapper.getPluginId(), task.getName());
                     collectedTasks.add(task);
                 }
             }
@@ -136,7 +134,7 @@ public class StartupRunner implements ApplicationRunner {
                 continue;
             }
 
-            logger.debug("Scheduled {} for \"{}\"", task.getName(), humanTriggerName);
+            logger.debug("Scheduled task {} with trigger \"{}\"", task.getName(), humanTriggerName);
         }
     }
 }

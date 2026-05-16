@@ -1,6 +1,7 @@
-package dev.jqb.onefeed.app.plugins;
+package dev.jqb.onefeed.app.plugin;
 
 import dev.jqb.onefeed.api.plugin.PluginConfigsFile;
+import dev.jqb.onefeed.app.aggregation.FeedRegistry;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,12 +51,12 @@ public class PluginConfig {
 
     @Bean
     public OneFeedPluginManager oneFeedPluginManager(PluginConfigsFile pluginConfigsFile,
-        PluginTypeRegistry pluginTypeRegistry
+        PluginTypeRegistry pluginTypeRegistry, FeedRegistry feedRegistry
     ) {
         OneFeedPluginManager pluginManager = new OneFeedPluginManager(Path.of(directoryPath),
             pluginConfigsFile);
         OneFeedPluginStateListener pluginStateListener =
-            new OneFeedPluginStateListener(pluginTypeRegistry);
+            new OneFeedPluginStateListener(pluginTypeRegistry, feedRegistry);
 
         // Register the listener with the plugin manager
         pluginManager.addPluginStateListener(pluginStateListener);
