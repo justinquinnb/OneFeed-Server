@@ -1,8 +1,8 @@
 package dev.jqb.onefeed.app.aggregation;
 
+import dev.jqb.onefeed.api.aggregation.Aggregator;
 import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.NormalizedContent;
-import dev.jqb.onefeed.api.feed.Aggregator;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
 import java.util.HashMap;
