@@ -21,10 +21,11 @@ public abstract class NormalizedContent extends Content {
      * Constructs a piece of {@code NormalizedContent} attributed to the provided {@code source}
      * and published at the given time.
      *
+     * @param idOnPlatform the unique identifier of the content on its source platform
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public NormalizedContent(Source source, Instant published) {
-        super(source, published);
+    public NormalizedContent(String idOnPlatform, Source source, Instant published) {
+        super(idOnPlatform, source, published);
     }
 }

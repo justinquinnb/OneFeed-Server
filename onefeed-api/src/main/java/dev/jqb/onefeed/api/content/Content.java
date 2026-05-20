@@ -24,6 +24,11 @@ import lombok.ToString;
 public abstract class Content {
 
     /**
+     * The unique identifier of the content on its source platform.
+     */
+    protected String idOnPlatform;
+
+    /**
      * Gets information about the source of the content.
      */
     protected Source source;
@@ -37,10 +42,12 @@ public abstract class Content {
      * Constructs a piece of {@code Content} attributed to a {@code source} and created/published
      * at the given time.
      *
+     * @param idOnPlatform the unique identifier of the content on its source platform
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public Content(Source source, Instant published) {
+    public Content(String idOnPlatform, Source source, Instant published) {
+        this.idOnPlatform = idOnPlatform;
         this.source = source;
         this.published = published;
     }

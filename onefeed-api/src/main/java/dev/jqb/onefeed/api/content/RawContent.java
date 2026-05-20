@@ -18,10 +18,11 @@ public abstract class RawContent extends Content {
      * Constructs a piece of {@code RawContent} attributed to a {@code source} and created/published
      * at the given time.
      *
+     * @param idOnPlatform the unique identifier of the content on its source platform
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public RawContent(Source source, Instant published) {
-        super(source, published);
+    public RawContent(String idOnPlatform, Source source, Instant published) {
+        super(idOnPlatform, source, published);
     }
 }
