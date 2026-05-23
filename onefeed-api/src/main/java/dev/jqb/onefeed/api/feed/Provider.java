@@ -4,6 +4,7 @@ import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.Normalizer;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import reactor.core.publisher.Mono;
@@ -30,6 +31,28 @@ public interface Provider<Out extends RawContent> {
     Mono<FilteredContent<Out>> fetchRecentContent(
         String name,
         int amount,
+        List<ContentFilter<?>> filters,
+        HashMap<String, String> config
+    );
+
+    /**
+     * Fetches the given {@code amount} of most recently published content from {@code this}
+     * provider's content source for the given feed {@code name}.
+     *
+     * @param name the name of the feed whose content to retrieve
+     * @param amount the target amount of content to retrieve
+     * @param after the point (often a cursor) to start retrieving content AFTER, however that's
+     *              represented by this provider's platform's API
+     * @param filters the filters to try applying if supported by the API or best performed on the
+     *                {@link Out} content itself
+     * @param config a map of feed-specific configuration options for this specific request
+     *
+     * @return a {@link Mono} that emits a {@link FilteredContent} containing the retrieved content
+     */
+    Mono<FilteredContent<Out>> fetchRecentContent(
+        String name,
+        int amount,
+        String after,
         List<ContentFilter<?>> filters,
         HashMap<String, String> config
     );

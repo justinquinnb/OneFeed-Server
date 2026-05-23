@@ -39,15 +39,24 @@ public abstract class Content {
     protected Instant published;
 
     /**
+     * The cursor pointing to {@code this} content, or some equivalent means, on the originating
+     * platform's API.
+     */
+    protected String cursor;
+
+    /**
      * Constructs a piece of {@code Content} attributed to a {@code source} and created/published
      * at the given time.
      *
      * @param idOnPlatform the unique identifier of the content on its source platform
+     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public Content(String idOnPlatform, Source source, Instant published) {
+    public Content(String idOnPlatform, String cursor, Source source, Instant published) {
         this.idOnPlatform = idOnPlatform;
+        this.cursor = cursor;
         this.source = source;
         this.published = published;
     }

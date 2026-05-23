@@ -56,11 +56,15 @@ public class OneFeedContent extends NormalizedContent {
      * @param body the primary textual content, using CommonMark-Flavored Markdown for any
      *             formatting
      * @param idOnPlatform the unique identifier of the content on its source platform
+     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(String body, String idOnPlatform, Source source, Instant published) {
-        super(idOnPlatform, source, published);
+    public OneFeedContent(String body, String idOnPlatform, String cursor, Source source,
+        Instant published
+    ) {
+        super(idOnPlatform, cursor, source, published);
         this.body = body;
     }
 
@@ -71,11 +75,15 @@ public class OneFeedContent extends NormalizedContent {
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
      * @param idOnPlatform the unique identifier of the content on its source platform
+     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(List<Media> media, String idOnPlatform, Source source, Instant published) {
-        super(idOnPlatform, source, published);
+    public OneFeedContent(List<Media> media, String idOnPlatform, String cursor, Source source,
+        Instant published
+    ) {
+        super(idOnPlatform, cursor, source, published);
         this.media = media;
     }
 
@@ -88,13 +96,15 @@ public class OneFeedContent extends NormalizedContent {
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
      * @param idOnPlatform the unique identifier of the content on its source platform
+     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(String body, List<Media> media, String idOnPlatform, Source source,
-        Instant published
+    public OneFeedContent(String body, List<Media> media, String idOnPlatform, String cursor,
+        Source source, Instant published
     ) {
-        super(idOnPlatform, source, published);
+        super(idOnPlatform, cursor, source, published);
         this.body = body;
         this.media = media;
     }
