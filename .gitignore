@@ -37,5 +37,4 @@ onefeed-app/plugins/
 plugin-env.yaml
 plugin-config.yaml
 .env
-*.sh
 .flattened-pom.xml
