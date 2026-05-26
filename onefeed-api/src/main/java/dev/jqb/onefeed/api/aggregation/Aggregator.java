@@ -34,7 +34,7 @@ public interface Aggregator {
      *
      * @param amount the target amount of content to return after all filters have been applied
      * @param feeds the feeds to aggregate content from
-     * @param aggregateCursor the OneFeed-generated cursor to derive feed-specific cursors from
+     * @param aggregateCursor the OneFeed-generated nextPageCursor to derive feed-specific cursors from
      * @param filters the filters to apply to the aggregated content, limiting the results
      * @param feedConfigs a map of feed names to {@link Provider}-specific configurations that should be
      *               applied
@@ -45,17 +45,17 @@ public interface Aggregator {
         List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs);
 
     /**
-     * Generates an aggregate cursor from the cursors of the oldest content per feed.
+     * Generates an aggregate nextPageCursor from the cursors of the oldest content per feed.
      *
-     * @param content the content to generate an aggregate cursor for
-     * @return the aggregate cursor, encoded in base 64
+     * @param content the content to generate an aggregate nextPageCursor for
+     * @return the aggregate nextPageCursor, encoded in base 64
      */
     String generateAggregateCursor(List<Content> content);
 
     /**
-     * Decodes an aggregate cursor into a map of feed names to cursors.
+     * Decodes an aggregate nextPageCursor into a map of feed names to cursors.
      *
-     * @param aggregateCursor the aggregate cursor, encoded in base 64, to decode
+     * @param aggregateCursor the aggregate nextPageCursor, encoded in base 64, to decode
      * @return a mapping of feed names to cursors
      */
     HashMap<String, String> decodeAggregateCursor(String aggregateCursor);

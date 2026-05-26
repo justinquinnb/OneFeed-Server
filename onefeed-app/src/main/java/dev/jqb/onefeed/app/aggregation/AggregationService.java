@@ -45,7 +45,7 @@ public class AggregationService implements Aggregator {
         // Feed name -> oldest content for that feed
         HashMap<String, Content> oldestFeedContent = new HashMap<>();
 
-        // Feed name -> cursor string for that feed
+        // Feed name -> nextPageCursor string for that feed
         HashMap<String, String> cursorMap = new HashMap<>();
 
         // For all content in the aggregation list...
@@ -54,13 +54,13 @@ public class AggregationService implements Aggregator {
 
             // Associate the current content piece with the feed if no entry exists already
             Content currentOldest = oldestFeedContent.putIfAbsent(feedName, c);
-            cursorMap.putIfAbsent(feedName, c.getCursor());
+            cursorMap.putIfAbsent(feedName, c.getNextPageCursor());
 
             // Else, as is the case when an entry already existed for that feed, replace it if
             // this content is older
             if (c.getPublished().isBefore(currentOldest.getPublished())) {
                 oldestFeedContent.put(feedName, c);
-                cursorMap.put(feedName, c.getCursor());
+                cursorMap.put(feedName, c.getNextPageCursor());
             }
         }
 

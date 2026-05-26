@@ -56,7 +56,7 @@ public class OneFeedContent extends NormalizedContent {
      * @param body the primary textual content, using CommonMark-Flavored Markdown for any
      *             formatting
      * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
      *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
@@ -75,7 +75,7 @@ public class OneFeedContent extends NormalizedContent {
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
      * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
      *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}
@@ -96,7 +96,7 @@ public class OneFeedContent extends NormalizedContent {
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
      * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the cursor pointing to {@code this} content, or some equivalent means, on the
+     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
      *               originating platform's API
      * @param source the origin of the {@code Content}
      * @param published the time the {@code Content} was published on its {@code source}

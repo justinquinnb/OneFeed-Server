@@ -41,8 +41,8 @@ public interface Provider<Out extends RawContent> {
      *
      * @param name the name of the feed whose content to retrieve
      * @param amount the target amount of content to retrieve
-     * @param after the point (often a cursor) to start retrieving content AFTER, however that's
-     *              represented by this provider's platform's API
+     * @param cursor the point to start retrieving content AFTER, however that's best represented
+     *               by this provider's platform's API
      * @param filters the filters to try applying if supported by the API or best performed on the
      *                {@link Out} content itself
      * @param config a map of feed-specific configuration options for this specific request
@@ -52,7 +52,7 @@ public interface Provider<Out extends RawContent> {
     Mono<FilteredContent<Out>> fetchRecentContent(
         String name,
         int amount,
-        String after,
+        String cursor,
         List<ContentFilter<?>> filters,
         HashMap<String, String> config
     );
