@@ -38,3 +38,4 @@ plugin-env.yaml
 plugin-config.yaml
 .env
 .flattened-pom.xml
+onefeed-app/plugin-config.yaml
