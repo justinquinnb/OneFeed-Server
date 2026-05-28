@@ -12,11 +12,16 @@
 
   <groupId>dev.jqb</groupId>
   <artifactId>onefeed</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>${revision}</version>
   <name>OneFeed</name>
   <description>A simple, extensible social media feed aggregation service</description>
   <url>https://github.com/justinquinnb/OneFeed</url>
   <packaging>pom</packaging>
+
+  <properties>
+    <revision>0.0.2-SNAPSHOT</revision>
+    <java.version>25</java.version>
+  </properties>
 
   <licenses>
     <license/>
@@ -30,16 +35,41 @@
     <tag/>
     <url/>
   </scm>
-  <properties>
-    <java.version>25</java.version>
-  </properties>
+
   <modules>
     <module>onefeed-app</module>
     <module>onefeed-api</module>
+    <module>onefeed-plugin-test-kit</module>
+    <module>onefeed-bom</module>
   </modules>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.7.3</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -55,8 +85,70 @@
           </annotationProcessorPaths>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <show>private</show>
+          <doclint>none</doclint>
+        </configuration>
+        <executions>
+          <execution>
+            <id>aggregate</id>
+            <goals>
+              <goal>aggregate</goal>
+            </goals>
+            <phase>site</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.12.0</version>
+          <configuration>
+            <show>private</show>
+            <doclint>none</doclint>
+            <tags>
+              <tag>
+                <name>implSpec</name>
+                <placement>a</placement>
+                <head>Implementation Requirements:</head>
+              </tag>
+              <tag>
+                <name>implNote</name>
+                <placement>a</placement>
+                <head>Implementation Note:</head>
+              </tag>
+            </tags>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.12.0</version>
+        <reportSets>
+          <reportSet>
+            <id>aggregate</id>
+            <inherited>false</inherited>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <dependencyManagement>
     <dependencies>
@@ -70,23 +162,34 @@
         <groupId>org.pf4j</groupId>
         <artifactId>pf4j</artifactId>
         <version>3.15.0</version>
-        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>3.1.3</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.jqb</groupId>
+        <artifactId>onefeed-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>6.0.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.projectreactor</groupId>
+        <artifactId>reactor-core</artifactId>
+        <version>3.8.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>3.27.7</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.44</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.pf4j</groupId>
-      <artifactId>pf4j</artifactId>
-      <version>3.15.0</version>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
 </project>

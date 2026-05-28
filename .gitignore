@@ -32,7 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
-# Plugins directory for testing
+# OneFeed Specific Stuff
 onefeed-app/plugins/
 plugin-env.yaml
+plugin-config.yaml
 .env
+.flattened-pom.xml
+onefeed-app/plugin-config.yaml

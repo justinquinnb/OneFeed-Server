@@ -7,11 +7,11 @@
     <parent>
         <groupId>dev.jqb</groupId>
         <artifactId>onefeed</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
-    <groupId>dev.jqb</groupId>
     <artifactId>onefeed-app</artifactId>
+    <name>OneFeed App</name>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
@@ -64,13 +64,29 @@
         <dependency>
             <groupId>dev.jqb</groupId>
             <artifactId>onefeed-api</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
             <version>3.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.28.0</version>
         </dependency>
     </dependencies>
 

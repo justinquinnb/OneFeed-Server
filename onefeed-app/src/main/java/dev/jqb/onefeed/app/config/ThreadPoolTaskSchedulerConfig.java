@@ -4,6 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+/**
+ * Provides the task scheduler bean, which is used to handle execution of
+ * {@link dev.jqb.onefeed.api.plugin.ScheduledTask}s
+ */
 @Configuration
 public class ThreadPoolTaskSchedulerConfig {
 
