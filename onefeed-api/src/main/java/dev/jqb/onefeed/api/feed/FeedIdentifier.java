@@ -2,12 +2,14 @@ package dev.jqb.onefeed.api.feed;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * A means of identifying a single feed of content
  */
 @Getter
 @Setter
+@ToString
 public class FeedIdentifier {
 
     /**
