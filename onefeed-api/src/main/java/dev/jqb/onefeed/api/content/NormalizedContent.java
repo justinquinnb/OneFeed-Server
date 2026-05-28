@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link Provider}-generated content that has since been normalized,
@@ -18,16 +19,15 @@ import lombok.ToString;
 public abstract class NormalizedContent extends Content {
 
     /**
-     * Constructs a piece of {@code NormalizedContent} attributed to the provided {@code source}
-     * and published at the given time.
+     * Constructs a piece of {@code NormalizedContent} attributed to a {@code source} and
+     * created/published at the given time.
      *
-     * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
-     *               originating platform's API
-     * @param source the origin of the {@code Content}
-     * @param published the time the {@code Content} was published on its {@code source}
+     * @param source the origin of the content
+     * @param nextPageCursor the cursor pointing to the next page of content after {@code this} (or
+     *                       some equivalent means), if known, on the originating platform's API
+     * @param published      the time the {@code Content} was published on its {@code source}
      */
-    public NormalizedContent(String idOnPlatform, String cursor, Source source, Instant published) {
-        super(idOnPlatform, cursor, source, published);
+    public NormalizedContent(SourceInfo source, @Nullable String nextPageCursor, Instant published) {
+        super(source, nextPageCursor, published);
     }
 }

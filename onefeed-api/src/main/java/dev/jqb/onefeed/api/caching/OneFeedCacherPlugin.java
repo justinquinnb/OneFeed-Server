@@ -11,12 +11,13 @@ public abstract class OneFeedCacherPlugin extends OneFeedPlugin {
 
     /**
      * Constructs a new {@link OneFeedPlugin} with the given {@code cacherEnv}.
+     * @param pluginId the unique identifier of this plugin in the app context
      * @param cacherConfig the environment variables specific to this plugin
      *
      * @see #cacherConfig
      */
-    protected OneFeedCacherPlugin(CacherConfig cacherConfig) {
-        super();
+    protected OneFeedCacherPlugin(String pluginId, CacherConfig cacherConfig) {
+        super(pluginId);
         this.cacherConfig = cacherConfig;
     }
 

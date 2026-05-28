@@ -8,12 +8,16 @@ import java.util.List;
  * A OneFeed {@link Provider} plugin
  */
 public abstract class OneFeedProviderPlugin extends OneFeedPlugin {
+    protected ProviderConfig providerConfig;
+
     /**
      * Constructs a new {@link OneFeedPlugin} with the given {@code providerEnv}.
+     * @param pluginId the unique identifier of this plugin in the app context
      * @param providerConfig the environment variables specific to this plugin
      */
-    protected OneFeedProviderPlugin(ProviderConfig providerConfig) {
-        super();
+    protected OneFeedProviderPlugin(String pluginId, ProviderConfig providerConfig) {
+        super(pluginId);
+        this.providerConfig = providerConfig;
     }
 
     /**

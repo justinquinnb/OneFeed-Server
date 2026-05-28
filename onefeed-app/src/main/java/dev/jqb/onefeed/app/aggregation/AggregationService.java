@@ -3,7 +3,7 @@ package dev.jqb.onefeed.app.aggregation;
 import dev.jqb.onefeed.api.aggregation.Aggregator;
 import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.content.ContentFilter;
-import dev.jqb.onefeed.api.content.NormalizedContent;
+import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
 import java.util.Base64;
@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Responsible for aggregating content from {@link Provider}s
@@ -28,20 +28,20 @@ public class AggregationService implements Aggregator {
     }
 
     @Override
-    public List<NormalizedContent> aggregate(int amount, List<Feed<?>> feeds,
+    public List<RawContent> aggregate(int amount, List<Feed<?>> feeds,
         List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs) {
         return List.of();
     }
 
     @Override
-    public List<NormalizedContent> aggregate(int amount, List<Feed<?>> feeds,
+    public List<RawContent> aggregate(int amount, List<Feed<?>> feeds,
         String aggregateCursor, List<ContentFilter<?>> filters,
         HashMap<String, String> feedConfigs) {
         return List.of();
     }
 
     @Override
-    public String generateAggregateCursor(List<Content> content) {
+    public String generateAggregateCursor(List<RawContent> content) {
         // Feed name -> oldest content for that feed
         HashMap<String, Content> oldestFeedContent = new HashMap<>();
 
@@ -49,18 +49,18 @@ public class AggregationService implements Aggregator {
         HashMap<String, String> cursorMap = new HashMap<>();
 
         // For all content in the aggregation list...
-        for (Content c : content) {
-            String feedName = c.getSource().getFeed().getName();
+        for (RawContent c : content) {
+            String feedId = c.getSource().getFeedId().toIdString();
 
             // Associate the current content piece with the feed if no entry exists already
-            Content currentOldest = oldestFeedContent.putIfAbsent(feedName, c);
-            cursorMap.putIfAbsent(feedName, c.getNextPageCursor());
+            Content currentOldest = oldestFeedContent.putIfAbsent(feedId, c);
+            cursorMap.putIfAbsent(feedId, c.getNextPageCursor());
 
             // Else, as is the case when an entry already existed for that feed, replace it if
             // this content is older
             if (c.getPublished().isBefore(currentOldest.getPublished())) {
-                oldestFeedContent.put(feedName, c);
-                cursorMap.put(feedName, c.getNextPageCursor());
+                oldestFeedContent.put(feedId, c);
+                cursorMap.put(feedId, c.getNextPageCursor());
             }
         }
 

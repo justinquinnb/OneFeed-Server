@@ -2,13 +2,14 @@ package dev.jqb.onefeed.api.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.jqb.onefeed.api.content.NormalizedContent;
-import dev.jqb.onefeed.api.content.Source;
+import dev.jqb.onefeed.api.content.SourceInfo;
 import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The default implementation of {@link NormalizedContent}
@@ -44,27 +45,26 @@ public class OneFeedContent extends NormalizedContent {
 
     /**
      * The quantity of whatever reaction type is primary on the source platform, the semantics of
-     * which are discernable via interpretation of the content's {@link #source} by the client
+     * which are discernable via interpretation of the content's source platform by the client
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int primaryReactionCount;
 
     /**
-     * Constructs a piece of {@code OneFeedContent}, containing just body text. All other fields may
-     * be set with setters.
+     * Constructs a piece of {@code OneFeedContent} attributed to a {@code source} and
+     * created/published at the given time.
      *
+     * @param source the origin of the content
+     * @param nextPageCursor the cursor pointing to the next page of content after {@code this} (or
+     *                       some equivalent means), if known, on the originating platform's API
+     * @param published the time the {@code Content} was published on its {@code source}
      * @param body the primary textual content, using CommonMark-Flavored Markdown for any
      *             formatting
-     * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
-     *               originating platform's API
-     * @param source the origin of the {@code Content}
-     * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(String body, String idOnPlatform, String cursor, Source source,
-        Instant published
+    public OneFeedContent(SourceInfo source, @Nullable String nextPageCursor, Instant published,
+        String body
     ) {
-        super(idOnPlatform, cursor, source, published);
+        super(source, nextPageCursor, published);
         this.body = body;
     }
 
@@ -72,18 +72,17 @@ public class OneFeedContent extends NormalizedContent {
      * Constructs a piece of {@code OneFeedContent}, containing just media. All other fields may be
      * set with setters.
      *
+     * @param source the origin of the content
+     * @param nextPageCursor the cursor pointing to the next page of content after {@code this} (or
+     *                       some equivalent means), if known, on the originating platform's API
+     * @param published the time the {@code Content} was published on its {@code source}
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
-     * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
-     *               originating platform's API
-     * @param source the origin of the {@code Content}
-     * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(List<Media> media, String idOnPlatform, String cursor, Source source,
-        Instant published
+    public OneFeedContent(SourceInfo source, @Nullable String nextPageCursor, Instant published,
+        List<Media> media
     ) {
-        super(idOnPlatform, cursor, source, published);
+        super(source, nextPageCursor, published);
         this.media = media;
     }
 
@@ -91,20 +90,19 @@ public class OneFeedContent extends NormalizedContent {
      * Constructs a piece of {@code OneFeedContent}, containing both body text and media. All other
      * fields may be set with setters.
      *
+     * @param source the origin of the content
+     * @param nextPageCursor the cursor pointing to the next page of content after {@code this} (or
+     *                       some equivalent means), if known, on the originating platform's API
+     * @param published the time the {@code Content} was published on its {@code source}
      * @param body the primary textual content, using CommonMark-Flavored Markdown for any
      *             formatting
      * @param media any attached media, such as links, videos, images, or files, in their desired
      *              order of presentation or priority (high/first to low/last)
-     * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param cursor the nextPageCursor pointing to {@code this} content, or some equivalent means, on the
-     *               originating platform's API
-     * @param source the origin of the {@code Content}
-     * @param published the time the {@code Content} was published on its {@code source}
      */
-    public OneFeedContent(String body, List<Media> media, String idOnPlatform, String cursor,
-        Source source, Instant published
+    public OneFeedContent(SourceInfo source, @Nullable String nextPageCursor, Instant published,
+        String body, List<Media> media
     ) {
-        super(idOnPlatform, cursor, source, published);
+        super(source, nextPageCursor, published);
         this.body = body;
         this.media = media;
     }

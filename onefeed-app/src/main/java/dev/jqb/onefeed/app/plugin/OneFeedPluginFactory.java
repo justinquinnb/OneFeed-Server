@@ -35,12 +35,12 @@ public class OneFeedPluginFactory extends DefaultPluginFactory {
                 ProviderConfig pluginEnv = pluginConfigsFile.getProviderConfigs()
                     .get(pluginWrapper.getPluginId());
 
-                Constructor<?> constructor = pluginClass.getConstructor(ProviderConfig.class);
-                return (Plugin) constructor.newInstance(pluginEnv);
+                Constructor<?> constructor = pluginClass.getConstructor(String.class, ProviderConfig.class);
+                return (Plugin) constructor.newInstance(pluginWrapper.getPluginId(), pluginEnv);
             }
 
-            Constructor<?> constructor = pluginClass.getConstructor();
-            return (Plugin) constructor.newInstance();
+            Constructor<?> constructor = pluginClass.getConstructor(String.class);
+            return (Plugin) constructor.newInstance(pluginWrapper.getPluginId());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

@@ -1,8 +1,7 @@
 package dev.jqb.onefeed.api.aggregation;
 
-import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.content.ContentFilter;
-import dev.jqb.onefeed.api.content.NormalizedContent;
+import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
 import java.util.HashMap;
@@ -25,7 +24,7 @@ public interface Aggregator {
      *
      * @return a list of all content that was retrieved, in descending order of creation timestamp
      */
-    List<NormalizedContent> aggregate(int amount, List<Feed<?>> feeds,
+    List<RawContent> aggregate(int amount, List<Feed<?>> feeds,
         List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs);
 
     /**
@@ -41,7 +40,7 @@ public interface Aggregator {
      *
      * @return a list of all content that was retrieved, in descending order of creation timestamp
      */
-    List<NormalizedContent> aggregate(int amount, List<Feed<?>> feeds, String aggregateCursor,
+    List<RawContent> aggregate(int amount, List<Feed<?>> feeds, String aggregateCursor,
         List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs);
 
     /**
@@ -50,7 +49,7 @@ public interface Aggregator {
      * @param content the content to generate an aggregate nextPageCursor for
      * @return the aggregate nextPageCursor, encoded in base 64
      */
-    String generateAggregateCursor(List<Content> content);
+    String generateAggregateCursor(List<RawContent> content);
 
     /**
      * Decodes an aggregate nextPageCursor into a map of feed names to cursors.

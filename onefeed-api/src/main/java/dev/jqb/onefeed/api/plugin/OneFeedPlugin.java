@@ -14,6 +14,19 @@ import org.pf4j.Plugin;
 public abstract class OneFeedPlugin extends Plugin {
 
     /**
+     * The unique identifier of this plugin in the app context
+     */
+    protected String pluginId;
+
+    /**
+     * Constructs a new {@code OneFeedPlugin} with the given plugin ID
+     * @param pluginId the unique identifier of this plugin in the app context
+     */
+    public OneFeedPlugin(String pluginId) {
+        this.pluginId = pluginId;
+    }
+
+    /**
      * Gets all classes that OneFeed may need to deserialize from JSON strings.
      *
      * @return a list of classes that OneFeed may need to deserialize from JSON strings, such as
