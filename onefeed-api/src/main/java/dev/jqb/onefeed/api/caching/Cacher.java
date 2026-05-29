@@ -35,6 +35,15 @@ public interface Cacher {
         String cursor, List<ContentFilter<? extends Content>> filters);
 
     /**
+     * Gets a specific piece of content from the cache.
+     * @param feed the feed whose content to retrieve
+     * @param idOnPlatform the id of the content to retrieve
+     * @return the content with the given id for the given {@code feed}, or {@code null} if no such
+     * content exists
+     */
+    Content fetchContent(FeedIdentifier feed, String idOnPlatform);
+
+    /**
      * Caches the given {@code content}.
      *
      * @param content the content to cache
@@ -43,6 +52,13 @@ public interface Cacher {
      * and its last updated timestamp
      */
     void cacheContent(List<Content> content);
+
+    /**
+     * Removes the content with the given id for the given feed from the cache.
+     * @param feed the feed whose content to remove
+     * @param idOnPlatform the id of the content to remove
+     */
+    void removeContent(FeedIdentifier feed, String idOnPlatform);
 
     /**
      * Gets the desired author from the cache
@@ -62,4 +78,10 @@ public interface Cacher {
      * and its last updated timestamp
      */
     void cacheAuthors(List<Author> authors);
+
+    /**
+     * Removes the author with the given id for the given feed from the cache.
+     * @param feed the feed whose author to remove
+     */
+    void removeAuthor(FeedIdentifier feed);
 }

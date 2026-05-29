@@ -80,4 +80,11 @@ public interface Provider<Out extends RawContent> {
      * @return the profile for the given feed
      */
     Mono<Profile> getProfile(String feedName);
+
+    /**
+     * Checks if the platform API this provider uses is available.
+     * @return {@code true} if the platform API this provider uses is available,
+     * {@code false} otherwise
+     */
+    boolean isApiAvailable();
 }
