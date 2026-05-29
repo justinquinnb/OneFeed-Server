@@ -4,6 +4,7 @@ import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.Normalizer;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
+import dev.jqb.onefeed.api.impl.Profile;
 import java.util.HashMap;
 import java.util.List;
 import reactor.core.publisher.Mono;

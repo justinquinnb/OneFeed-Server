@@ -1,12 +1,11 @@
-package dev.jqb.onefeed.api.content;
+package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * A minimum description of a content's origin
+ * A minimum description of a platform entity's origin
  */
 @Getter
 @Setter
@@ -19,12 +18,12 @@ public class SourceInfo {
     private FeedIdentifier feedId;
 
     /**
-     * The unique identifier of the content on its source platform
+     * The unique identifier of the entity on its source platform
      */
     private String idOnPlatform;
 
     /**
-     * The URL of the content resource on its feed's platform
+     * The URL of the resource on its feed's platform
      */
     private String url;
 

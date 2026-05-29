@@ -1,5 +1,8 @@
 package dev.jqb.onefeed.api.content;
 
+import dev.jqb.onefeed.api.feed.FeedIdentifiable;
+import dev.jqb.onefeed.api.feed.FeedIdentifier;
+import dev.jqb.onefeed.api.feed.SourceInfo;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 @Setter
 @NoArgsConstructor
 @ToString
-public abstract class Content {
+public abstract class Content implements FeedIdentifiable {
 
     /**
      * The origin of the content
@@ -46,5 +49,10 @@ public abstract class Content {
         this.source = source;
         this.nextPageCursor = nextPageCursor;
         this.published = published;
+    }
+
+    @Override
+    public FeedIdentifier getFeedIdentifier() {
+        return source.getFeedId();
     }
 }

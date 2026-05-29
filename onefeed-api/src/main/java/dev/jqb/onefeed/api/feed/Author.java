@@ -12,12 +12,12 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class Author {
+public class Author implements FeedIdentifiable {
 
     /**
-     * The unique, permanent identifier of the author on the content's platform
+     * The origin of the author
      */
-    private String id;
+    private SourceInfo source;
 
     /**
      * The handle of the author on the content's platform, devoid of any
@@ -26,21 +26,19 @@ public class Author {
     private String handle;
 
     /**
-     * The URL of the author's feed on the content's platform
-     */
-    private String feedUrl;
-
-    /**
      * Constructs a piece of {@code Author} info.
      *
-     * @param id the unique, permanent identifier of the author on the source's platform
+     * @param source the origin of the author
      * @param handle the username of the author on the source's platform, devoid of any
      *                 platform-specific prefixes like {@code @}
-     * @param feedUrl the URL of the author's feed on the source's platform
      */
-    public Author(String id, String handle, String feedUrl) {
-        this.id = id;
+    public Author(SourceInfo source, String handle) {
+        this.source = source;
         this.handle = handle;
-        this.feedUrl = feedUrl;
+    }
+
+    @Override
+    public FeedIdentifier getFeedIdentifier() {
+        return source.getFeedId();
     }
 }
