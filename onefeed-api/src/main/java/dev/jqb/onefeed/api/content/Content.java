@@ -17,7 +17,9 @@ import org.jspecify.annotations.Nullable;
 @Setter
 @NoArgsConstructor
 @ToString
-public abstract class Content implements FeedIdentifiable {
+public abstract sealed class Content implements FeedIdentifiable permits RawContent,
+    NormalizedContent
+{
 
     /**
      * The origin of the content

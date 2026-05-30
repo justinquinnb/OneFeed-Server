@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public abstract class NormalizedContent extends Content {
+public abstract non-sealed class NormalizedContent extends Content {
 
     /**
      * Constructs a piece of {@code NormalizedContent} attributed to a {@code source} and

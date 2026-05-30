@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
-public abstract class RawContent extends Content {
+public abstract non-sealed class RawContent extends Content {
 
     /**
      * Constructs a piece of {@code RawContent} attributed to a {@code source} and created/published
