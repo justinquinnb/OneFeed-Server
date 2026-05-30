@@ -39,4 +39,15 @@ public class FeedIdentifier {
     public String toIdString() {
         return providerId + ":" + name;
     }
+
+    /**
+     * Converts a string of format {@code <}{@link #providerId}{@code >:<}{@link #name}{@code >}
+     * into a {@code FeedIdentifier} object.
+     * @param idString the string to convert
+     * @return a {@code FeedIdentifier} object representing the given string
+     */
+    public static FeedIdentifier fromIdString(String idString) {
+        String[] parts = idString.split(":");
+        return new FeedIdentifier(parts[0], parts[1]);
+    }
 }

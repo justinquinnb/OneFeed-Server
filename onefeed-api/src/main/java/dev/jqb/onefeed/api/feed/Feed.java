@@ -10,9 +10,9 @@ import lombok.Getter;
 public class Feed<Out extends RawContent> {
 
     /**
-     * The name of the feed
+     * The unique identifier of the feed
      */
-    private String name;
+    private FeedIdentifier id;
 
     /**
      * The provider of the feed
@@ -21,11 +21,11 @@ public class Feed<Out extends RawContent> {
 
     /**
      * Creates a new {@code Feed} of name {@code name} provided by the given {@code provider}.
-     * @param name the name of the feed
+     * @param id the unique identifier of the feed
      * @param provider the provider that feed is accessible via
      */
-    public Feed(String name, Provider<Out> provider) {
-        this.name = name;
+    public Feed(FeedIdentifier id, Provider<Out> provider) {
+        this.id = id;
         this.provider = provider;
     }
 }
