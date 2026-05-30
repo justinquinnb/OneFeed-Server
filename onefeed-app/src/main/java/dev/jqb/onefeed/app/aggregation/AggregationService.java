@@ -1,14 +1,19 @@
 package dev.jqb.onefeed.app.aggregation;
 
+import dev.jqb.onefeed.api.aggregation.AggregationOptions;
 import dev.jqb.onefeed.api.aggregation.Aggregator;
+import dev.jqb.onefeed.api.caching.Cacher;
 import dev.jqb.onefeed.api.content.Content;
-import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.impl.OneFeedContent;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
@@ -18,9 +23,17 @@ import tools.jackson.databind.json.JsonMapper;
  * Responsible for aggregating content from {@link Provider}s
  */
 @Service
-public class AggregationService implements Aggregator {
+public class AggregationService implements Aggregator<OneFeedContent> {
+    private static final Logger logger = LoggerFactory.getLogger(AggregationService.class);
 
     private final JsonMapper jsonMapper;
+    /**
+     * -- SETTER --
+     *  Sets the service that this plugin uses to cache content.
+     * @param cache the service that this plugin uses to cache and retrieve content
+     */
+    @Setter
+    private Cacher cache;
 
     @Autowired
     public AggregationService(JsonMapper jsonMapper) {
@@ -28,20 +41,24 @@ public class AggregationService implements Aggregator {
     }
 
     @Override
-    public List<RawContent> aggregate(int amount, List<Feed<?>> feeds,
-        List<ContentFilter<?>> filters, HashMap<String, String> feedConfigs) {
+    public List<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+        AggregationOptions options
+    ) {
+        HashMap<String, Integer> targetAmounts = options.getTargetAmounts(amount);
+        HashMap<String, List<RawContent>> content = new HashMap<>();
+
         return List.of();
     }
 
     @Override
-    public List<RawContent> aggregate(int amount, List<Feed<?>> feeds,
-        String aggregateCursor, List<ContentFilter<?>> filters,
-        HashMap<String, String> feedConfigs) {
+    public List<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+        String aggregateCursor, AggregationOptions options
+    ) {
         return List.of();
     }
 
     @Override
-    public String generateAggregateCursor(List<RawContent> content) {
+    public String generateAggregateCursor(List<OneFeedContent> content) {
         // Feed name -> oldest content for that feed
         HashMap<String, Content> oldestFeedContent = new HashMap<>();
 
@@ -49,7 +66,7 @@ public class AggregationService implements Aggregator {
         HashMap<String, String> cursorMap = new HashMap<>();
 
         // For all content in the aggregation list...
-        for (RawContent c : content) {
+        for (OneFeedContent c : content) {
             String feedId = c.getSource().getFeedId().toIdString();
 
             // Associate the current content piece with the feed if no entry exists already
