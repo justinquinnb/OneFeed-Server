@@ -18,9 +18,10 @@ sequenceDiagram
         participant Database Service
         participant Social Media Platform
     end
+    Note over Provider,Cacher: Interfaces plugin implementations
 
-    activate Client
     Client->>+AggregationController: Subscribe to content aggregation
+    activate Client
     AggregationController->>+AggregationPackager: Request aggregation package
     par Fetch authors of feeds
         opt Include author data in aggregation
@@ -37,11 +38,12 @@ sequenceDiagram
             AggregationController-->>Client: Stream cached authors
             
             opt Cache is missing some authors
-                AuthorService->>+Provider: Get author normalizer
-                Provider-->>-AuthorService: Return author normalizer
-                
                 loop For each missing author
                     par
+                        AuthorService->>+Provider: Get author normalizer
+                        Note over AuthorService,Provider: Because each provider has its own normalizer
+                        Provider-->>-AuthorService: Return author normalizer
+                        
                         AuthorService->>+Provider: Request missing author
                         Provider->>+Social Media Platform: Request author
                         activate Provider
@@ -75,14 +77,14 @@ sequenceDiagram
         AggregationController-->>Client: Stream cached content
         
         opt Cache is missing some requested content
-        
-            ContentService->+Provider: Get content normalizer
-            activate ContentService
-                Provider-->>-ContentService: Return content normalizer
-            deactivate ContentService
-            
             loop For each feed without enough cached content
                 par
+                    ContentService->+Provider: Get content normalizer
+                    Note over ContentService,Provider: Because each provider has its own normalizer
+                    activate ContentService
+                    Provider-->>-ContentService: Return content normalizer
+                    deactivate ContentService
+                    
                     ContentService->>+Provider: Request missing amount of content
                     loop For each page necessary to get that amount
                         Provider->>+Social Media Platform: Request page of content
