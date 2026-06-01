@@ -1,8 +1,6 @@
-# Current End-to-End Aggregation Retrieval Sequence (To Be Revised)
-This was/is the original, planned sequence of events that occurs when a user requests an aggregation 
-from OneFeed's API. **It is set for revision soon** to reduce latency when Providers must be called, 
-likely by responding with cached data immediately and streaming the rest of the data from the 
-Providers as it comes in.
+# End-to-End Aggregation Retrieval Sequence
+This is the current, planned sequence of events that occurs when a user requests an aggregation 
+from OneFeed's API.
 ```mermaid
 sequenceDiagram
     box Your Client
@@ -21,81 +19,90 @@ sequenceDiagram
         participant Social Media Platform
     end
 
-    Client->>+AggregationController: Request content aggregation
     activate Client
+    Client->>+AggregationController: Subscribe to content aggregation
     AggregationController->>+AggregationPackager: Request aggregation package
-    activate AggregationController
     par Fetch authors of feeds
-        opt Include authors
-            AggregationPackager->>+AuthorService: Request authors of feeds
+        opt Include author data in aggregation
+            AggregationPackager-)+AuthorService: Request authors of feeds
+            
             AuthorService->>+Cacher: Fetch cached authors
-            activate AuthorService
-                Cacher->>+Database Service: Fetch authors
-                activate Cacher
-                    Database Service->>-Cacher: Return authors
-                deactivate Cacher
-                Cacher->>-AuthorService: Return cached authors
-            deactivate AuthorService
+            Cacher->>+Database Service: Fetch authors
+            activate Cacher
+                Database Service-->>-Cacher: Return authors
+            deactivate Cacher
+            Cacher-->>-AuthorService: Return cached authors
+            AuthorService--)AggregationPackager: Return cached authors
+            AggregationPackager-->>AggregationController: Return cached authors
+            AggregationController-->>Client: Stream cached authors
+            
             opt Cache is missing some authors
+                AuthorService->>+Provider: Get author normalizer
+                Provider-->>-AuthorService: Return author normalizer
+                
                 loop For each missing author
-                    AuthorService->>+Provider: Request missing author
-                    activate AuthorService
+                    par
+                        AuthorService->>+Provider: Request missing author
                         Provider->>+Social Media Platform: Request author
                         activate Provider
-                            Social Media Platform->>-Provider: Respond with author
+                            Social Media Platform-->>-Provider: Respond with author
                         deactivate Provider
-                        Provider->>-AuthorService: Return author
-                    deactivate AuthorService
-                    AuthorService->>+Provider: Get author normalizer
-                    activate AuthorService
-                        Provider->>-AuthorService: Return author normalizer
-                    deactivate AuthorService
-                    AuthorService->>AuthorService: Normalize new author
-                    AuthorService->>+Cacher: Cache new author
-                    Cacher->>-Database Service: Store new author
+                        Provider-->>-AuthorService: Return author
+                        
+                        AuthorService->>AuthorService: Normalize new author
+                        
+                        AuthorService-)+Cacher: Cache new author
+                        Cacher->>-Database Service: Store new author
+                        
+                        AuthorService--)-AggregationPackager: Return new author
+                        AggregationPackager-->>AggregationController: Return new author
+                        AggregationController-->>Client: Stream new author
+                    end
                 end
             end
-            AuthorService->>-AggregationPackager: Return desired authors
         end
     and Fetch content from feeds
-        AggregationPackager->>+ContentService: Request content from feeds
+        AggregationPackager-)+ContentService: Request content from feeds
+        
         ContentService->>+Cacher: Fetch cached content
-        activate ContentService
-            Cacher->>+Database Service: Fetch content
-            activate Cacher
-                Database Service->>-Cacher: Return content
-            deactivate Cacher
-            Cacher->>-ContentService: Return cached content
-        deactivate ContentService
+        Cacher->>+Database Service: Fetch content
+        activate Cacher
+            Database Service-->>-Cacher: Return content
+        deactivate Cacher
+        Cacher-->>-ContentService: Return cached content
+        ContentService--)AggregationPackager: Return cached content
+        AggregationPackager-->>AggregationController: Return cached content
+        AggregationController-->>Client: Stream cached content
+        
         opt Cache is missing some requested content
+        
+            ContentService->+Provider: Get content normalizer
+            activate ContentService
+                Provider-->>-ContentService: Return content normalizer
+            deactivate ContentService
+            
             loop For each feed without enough cached content
                 par
                     ContentService->>+Provider: Request missing amount of content
-                    activate ContentService
-                        loop For each page necessary to get that amount
-                            Provider->>+Social Media Platform: Request page of content
-                            activate Provider
-                                Social Media Platform->>-Provider: Respond with page of content
-                            deactivate Provider
-                        end
-                        Provider->>-ContentService: Return content
-                    deactivate ContentService
+                    loop For each page necessary to get that amount
+                        Provider->>+Social Media Platform: Request page of content
+                        activate Provider
+                            Social Media Platform-->>-Provider: Respond with page of content
+                        deactivate Provider
+                        Provider-->>-ContentService: Return new content page
+                        
+                        ContentService->>ContentService: Normalize new content
+                        
+                        ContentService-)+Cacher: Cache new content
+                        Cacher->>-Database Service: Store new content
+                        
+                        ContentService--)-AggregationPackager: Return new content
+                        AggregationPackager-->>-AggregationController: Return new content
+                        AggregationController-->>-Client: Stream new content
+                        deactivate Client
+                    end
                 end
             end
-            ContentService->+Provider: Get content normalizer
-            activate ContentService
-                Provider->>-ContentService: Return content normalizer
-            deactivate ContentService
-            ContentService->>ContentService: Normalize new content
-            ContentService->>+Cacher: Cache new content
-            Cacher->>-Database Service: Store new content
         end
-        ContentService->>ContentService: Sort complete list by timestamp
-        ContentService->>-AggregationPackager: Return desired content aggregation
     end
-    AggregationPackager->>AggregationPackager: Combine authors with content
-    AggregationPackager->>-AggregationController: Return aggregation package
-    deactivate AggregationController
-    AggregationController->>-Client: Return aggregation package
-    deactivate Client
 ```
