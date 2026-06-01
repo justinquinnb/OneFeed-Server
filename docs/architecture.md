@@ -28,11 +28,13 @@ sequenceDiagram
             AggregationPackager-)+AuthorService: Request authors of feeds
             
             AuthorService->>+Cacher: Fetch cached authors
-            Cacher->>+Database Service: Fetch authors
-            activate Cacher
-                Database Service-->>-Cacher: Return authors
-            deactivate Cacher
-            Cacher-->>-AuthorService: Return cached authors
+            activate AuthorService
+                Cacher->>+Database Service: Fetch authors
+                activate Cacher
+                    Database Service-->>-Cacher: Return authors
+                deactivate Cacher
+                Cacher-->>-AuthorService: Return cached authors
+            deactivate AuthorService
             AuthorService--)AggregationPackager: Return cached authors
             AggregationPackager-->>AggregationController: Return cached authors
             AggregationController-->>Client: Stream cached authors
@@ -41,15 +43,19 @@ sequenceDiagram
                 loop For each missing author
                     par
                         AuthorService->>+Provider: Get author normalizer
-                        Note over AuthorService,Provider: Because each provider has its own normalizer
+                        activate AuthorService
+                            Note over AuthorService,Provider: Because each provider has its own normalizer
                         Provider-->>-AuthorService: Return author normalizer
+                        deactivate AuthorService
                         
                         AuthorService->>+Provider: Request missing author
-                        Provider->>+Social Media Platform: Request author
-                        activate Provider
-                            Social Media Platform-->>-Provider: Respond with author
-                        deactivate Provider
-                        Provider-->>-AuthorService: Return author
+                        activate AuthorService
+                            Provider->>+Social Media Platform: Request author
+                            activate Provider
+                                Social Media Platform-->>-Provider: Respond with author
+                            deactivate Provider
+                            Provider-->>-AuthorService: Return author
+                        deactivate AuthorService
                         
                         AuthorService->>AuthorService: Normalize new author
                         
@@ -67,21 +73,23 @@ sequenceDiagram
         AggregationPackager-)+ContentService: Request content from feeds
         
         ContentService->>+Cacher: Fetch cached content
-        Cacher->>+Database Service: Fetch content
-        activate Cacher
-            Database Service-->>-Cacher: Return content
-        deactivate Cacher
-        Cacher-->>-ContentService: Return cached content
-        ContentService--)AggregationPackager: Return cached content
+        activate ContentService
+            Cacher->>+Database Service: Fetch content
+            activate Cacher
+                Database Service-->>-Cacher: Return content
+            deactivate Cacher
+            Cacher-->>-ContentService: Return cached content
+            ContentService--)AggregationPackager: Return cached content
+        deactivate ContentService
         AggregationPackager-->>AggregationController: Return cached content
         AggregationController-->>Client: Stream cached content
         
         opt Cache is missing some requested content
             loop For each feed without enough cached content
                 par
-                    ContentService->+Provider: Get content normalizer
-                    Note over ContentService,Provider: Because each provider has its own normalizer
+                    ContentService->>+Provider: Get content normalizer
                     activate ContentService
+                    Note over ContentService,Provider: Because each provider has its own normalizer
                     Provider-->>-ContentService: Return content normalizer
                     deactivate ContentService
                     
