@@ -28,6 +28,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     private static final Logger logger = LoggerFactory.getLogger(AggregationService.class);
 
     private final JsonMapper jsonMapper;
+
     /**
      * -- SETTER --
      *  Sets the service that this plugin uses to cache content.

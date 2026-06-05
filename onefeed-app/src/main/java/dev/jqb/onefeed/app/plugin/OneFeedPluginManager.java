@@ -1,5 +1,6 @@
 package dev.jqb.onefeed.app.plugin;
 
+import dev.jqb.onefeed.api.caching.OneFeedCacherPlugin;
 import dev.jqb.onefeed.api.feed.OneFeedProviderPlugin;
 import dev.jqb.onefeed.api.plugin.PluginConfigsFile;
 import java.nio.file.Path;
@@ -27,5 +28,17 @@ public class OneFeedPluginManager extends DefaultPluginManager {
     public List<PluginWrapper> getProviders() {
         return getPlugins().stream()
             .filter(p -> p.getPlugin() instanceof OneFeedProviderPlugin).toList();
+    }
+
+    /**
+     * Gets the first {@link PluginState#RESOLVED} {@link OneFeedCacherPlugin} found in the plugin
+     * manager.
+     * @return the first {@link PluginState#RESOLVED} {@link OneFeedCacherPlugin} found in the
+     * plugin manager
+     */
+    public PluginWrapper getCacher() {
+        return getPlugins().stream()
+            .filter(p -> p.getPlugin() instanceof OneFeedCacherPlugin)
+            .toList().getFirst();
     }
 }
