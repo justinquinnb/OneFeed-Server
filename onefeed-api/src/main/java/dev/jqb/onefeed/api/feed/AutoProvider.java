@@ -1,7 +1,6 @@
 package dev.jqb.onefeed.api.feed;
 
 import dev.jqb.onefeed.api.content.RawContent;
-import reactor.core.publisher.Flux;
 
 /**
  * Denotes a {@link Provider} capable of notifying OneFeed when a feed has been updated via webhooks
@@ -18,5 +17,5 @@ public interface AutoProvider<Out extends RawContent> extends Provider<Out> {
      *
      * @return the updated content that the webhook notification was referring to
      */
-    Flux<Out> handleWebhookNotif(String notifPayload);
+    FeedUpdate<Out> handleWebhookNotif(String notifPayload);
 }
