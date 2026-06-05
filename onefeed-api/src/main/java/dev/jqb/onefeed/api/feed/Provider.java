@@ -21,16 +21,11 @@ public interface Provider<Out extends RawContent> {
      * 
      * @param name the name of the feed whose content to retrieve
      * @param amount the target amount of content to retrieve
-     * @param config a map of feed-specific configuration options for this specific request
-     *               
-     * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
+     *
+     * @return a {@link Flux} that emits a stream of {@link Out} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Flux<Out> fetchRecentContent(
-        String name,
-        int amount,
-        HashMap<String, String> config
-    );
+    Flux<Out> fetchRecentContent(String name, int amount);
 
     /**
      * Fetches the given {@code amount} of most recently published content after the {@code cursor}
@@ -40,24 +35,18 @@ public interface Provider<Out extends RawContent> {
      * @param amount the target amount of content to retrieve
      * @param cursor the point to start retrieving content AFTER, however that's best represented
      *               by this provider's platform's API
-     * @param config a map of feed-specific configuration options for this specific request
      *
-     * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
+     * @return a {@link Flux} that emits a stream of {@link Out} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Flux<Out> fetchRecentContent(
-        String name,
-        int amount,
-        String cursor,
-        HashMap<String, String> config
-    );
+    Flux<Out> fetchRecentContent(String name, int amount, String cursor);
 
     /**
      * Gets the {@link Normalizer} capable of transforming this provider's
      * {@link RawContent} DTO into normalized {@link OneFeedContent}
      *
-     * @return a {@link Normalizer} capable of transforming this provider's
-     * {@link RawContent} DTO into normalized {@link OneFeedContent}
+     * @return a {@link Normalizer} capable of transforming this provider's {@link RawContent} DTO
+     * into normalized {@link OneFeedContent}
      */
     Normalizer<Out, OneFeedContent> getNormalizer();
 
