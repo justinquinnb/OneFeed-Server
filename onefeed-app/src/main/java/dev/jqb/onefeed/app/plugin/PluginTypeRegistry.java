@@ -46,17 +46,16 @@ public class PluginTypeRegistry {
     }
 
     /**
-     * Unregister all types that a plugin may have needed to deserialize from JSON strings.
-     * @param wrapper the wrapper of the plugin whose types to deregister
+     * Deregister all types that a plugin may have needed to deserialize from JSON strings.
+     * @param pluginId the ID of the plugin whose types to deregister
      */
-    public void unregisterTypesFrom(PluginWrapper wrapper) {
-        String pluginId = wrapper.getPluginId();
-        logger.debug("Unregistering types for plugin \"{}\"", pluginId);
+    public void deregisterTypesFrom(String pluginId) {
+        logger.debug("Deregistering types for plugin \"{}\"", pluginId);
         List<String> fqns = pluginIdToFqns.remove(pluginId);
         if (fqns != null) {
             for (String fqn : fqns) {
                 fqnToTypes.remove(fqn);
-                logger.trace("Unregistered type \"{}\"", fqn);
+                logger.trace("Deregistered type \"{}\"", fqn);
             }
         }
     }

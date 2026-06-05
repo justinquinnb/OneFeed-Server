@@ -26,7 +26,9 @@ public class FeedRegistry {
      * @param provider the provider plugin instance
      * @param feedNames the names of the feeds that the plugin is responsible for
      */
-    public void registerFeedsFor(PluginWrapper wrapper, Provider<?> provider, List<String> feedNames) {
+    public void registerFeedsFor(PluginWrapper wrapper, Provider<?> provider,
+        List<String> feedNames
+    ) {
         String pluginId = wrapper.getPluginId();
         logger.debug("Associating feed names with provider instance \"{}\"...",
             pluginId);
@@ -40,10 +42,10 @@ public class FeedRegistry {
     }
 
     /**
-     * Unregister all feeds that a provider plugin is responsible for.
+     * Deregister all feeds that a provider plugin is responsible for.
      * @param wrapper the wrapper of the provider plugin whose feeds to deregister
      */
-    public void unregisterFeedsFor(PluginWrapper wrapper) {
+    public void deregisterFeedsFor(PluginWrapper wrapper) {
         String pluginId = wrapper.getPluginId();
         logger.debug("Unregistering feeds for plugin \"{}\"", pluginId);
         List<String> feedNames = pluginIdToFeedNames.remove(pluginId);
