@@ -4,13 +4,16 @@ import dev.jqb.onefeed.api.aggregation.AggregationOptions;
 import dev.jqb.onefeed.api.aggregation.Aggregator;
 import dev.jqb.onefeed.api.caching.Cacher;
 import dev.jqb.onefeed.api.content.Content;
+import dev.jqb.onefeed.api.content.Normalizer;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
      * @param cache the service that this plugin uses to cache and retrieve content
      */
     @Setter
+    @Getter
     private Cacher cache;
 
     @Autowired
@@ -47,16 +51,70 @@ public class AggregationService implements Aggregator<OneFeedContent> {
         AggregationOptions options
     ) {
         HashMap<String, Integer> targetAmounts = options.getTargetAmounts(amount);
-        HashMap<String, List<RawContent>> content = new HashMap<>();
+        List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
 
-        return null;
+        for (Feed<? extends RawContent> feed : feeds) {
+            Provider<? extends RawContent> provider = feed.getProvider();
+            Normalizer<RawContent, OneFeedContent> normalizer =
+                (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
+            String feedName = feed.getId().getName();
+            Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
+                targetAmounts.get(feedName));
+
+            normalizedContentStreams.add(
+                feedStream
+                    .map(normalizer::normalize)
+                    .doOnError(err -> logger.warn(
+                        "Error fetching content from feed \"{}\": {}", feedName, err.getStackTrace()))
+                    .onErrorComplete()
+            );
+        }
+
+        Flux<OneFeedContent> mergedFlux = Flux.merge(normalizedContentStreams);
+        mergedFlux.doOnNext(this::cacheIfAble);
+
+        return mergedFlux;
     }
 
     @Override
     public Flux<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         String aggregateCursor, AggregationOptions options
     ) {
-        return null;
+        HashMap<String, Integer> targetAmounts = options.getTargetAmounts(amount);
+        HashMap<String, String> cursors = decodeAggregateCursor(aggregateCursor);
+        List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
+
+        for (Feed<? extends RawContent> feed : feeds) {
+            Provider<? extends RawContent> provider = feed.getProvider();
+            Normalizer<RawContent, OneFeedContent> normalizer =
+                (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
+            String feedName = feed.getId().getName();
+            Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
+                targetAmounts.get(feedName), cursors.get(feedName));
+
+            normalizedContentStreams.add(
+                feedStream
+                    .map(normalizer::normalize)
+                    .doOnError(err -> logger.warn(
+                        "Error fetching content from feed \"{}\": {}", feedName, err.getStackTrace()))
+                    .onErrorComplete()
+            );
+        }
+
+        Flux<OneFeedContent> mergedFlux = Flux.merge(normalizedContentStreams);
+        mergedFlux.doOnNext(this::cacheIfAble);
+
+        return mergedFlux;
+    }
+
+    /**
+     * Caches the given content if the cache is set.
+     * @param content the piece of {@link OneFeedContent} to cache if the cache is set
+     */
+    private void cacheIfAble(OneFeedContent content) {
+        if (cache != null) {
+            cache.cacheContent(List.of(content));
+        }
     }
 
     @Override
