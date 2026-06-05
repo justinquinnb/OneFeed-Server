@@ -6,6 +6,7 @@ import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.Provider;
 import java.util.HashMap;
 import java.util.List;
+import reactor.core.publisher.Flux;
 
 /**
  * An aggregator of content across multiple {@link Provider}s
@@ -22,7 +23,7 @@ public interface Aggregator<Out extends NormalizedContent> {
      *
      * @return a list of all content that was retrieved, in descending order of creation timestamp
      */
-    List<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+    Flux<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         AggregationOptions options);
 
     /**
@@ -36,7 +37,7 @@ public interface Aggregator<Out extends NormalizedContent> {
      *
      * @return a list of all content that was retrieved, in descending order of creation timestamp
      */
-    List<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+    Flux<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         String aggregateCursor, AggregationOptions options);
 
     /**

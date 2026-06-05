@@ -1,12 +1,11 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.Normalizer;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.Profile;
 import java.util.HashMap;
-import java.util.List;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,17 +21,14 @@ public interface Provider<Out extends RawContent> {
      * 
      * @param name the name of the feed whose content to retrieve
      * @param amount the target amount of content to retrieve
-     * @param filters the filters to try applying if supported by the API or best performed on the 
-     *                {@link Out} content itself
      * @param config a map of feed-specific configuration options for this specific request
      *               
      * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Mono<FilteredContent<Out>> fetchRecentContent(
+    Flux<Out> fetchRecentContent(
         String name,
         int amount,
-        List<ContentFilter<?>> filters,
         HashMap<String, String> config
     );
 
@@ -44,18 +40,15 @@ public interface Provider<Out extends RawContent> {
      * @param amount the target amount of content to retrieve
      * @param cursor the point to start retrieving content AFTER, however that's best represented
      *               by this provider's platform's API
-     * @param filters the filters to try applying if supported by the API or best performed on the
-     *                {@link Out} content itself
      * @param config a map of feed-specific configuration options for this specific request
      *
      * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Mono<FilteredContent<Out>> fetchRecentContent(
+    Flux<Out> fetchRecentContent(
         String name,
         int amount,
         String cursor,
-        List<ContentFilter<?>> filters,
         HashMap<String, String> config
     );
 

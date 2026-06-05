@@ -1,11 +1,9 @@
 package dev.jqb.onefeed.api.caching;
 
 import dev.jqb.onefeed.api.content.Content;
-import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.NormalizedContent;
 import dev.jqb.onefeed.api.feed.Author;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.FilteredContent;
 import java.util.List;
 
 /**
@@ -24,19 +22,18 @@ public interface Cacher<T extends NormalizedContent, U extends Author> {
      *
      * @return at most {@code amount} pieces of cached content from the desired feed
      */
-    FilteredContent<T> fetchRecentContent(FeedIdentifier feed, int amount,
-        List<ContentFilter<T>> filters);
+    List<T> fetchRecentContent(FeedIdentifier feed, int amount);
 
     /**
      * Gets the {@code amount} most recent content from the cache.
      *
      * @param feed the feed whose content to retrieve
      * @param amount the amount of content to try retrieving
+     * @param cursor the point to start retrieving content after, inclusively
      *
      * @return at most {@code amount} pieces of cached content from the desired feed
      */
-    FilteredContent<T> fetchRecentContent(FeedIdentifier feed, int amount,
-        String cursor, List<ContentFilter<T>> filters);
+    List<T> fetchRecentContent(FeedIdentifier feed, int amount, String cursor);
 
     /**
      * Gets a specific piece of content from the cache.

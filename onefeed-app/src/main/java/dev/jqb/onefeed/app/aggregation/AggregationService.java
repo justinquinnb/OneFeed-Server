@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -41,20 +42,20 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     }
 
     @Override
-    public List<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+    public Flux<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         AggregationOptions options
     ) {
         HashMap<String, Integer> targetAmounts = options.getTargetAmounts(amount);
         HashMap<String, List<RawContent>> content = new HashMap<>();
 
-        return List.of();
+        return null;
     }
 
     @Override
-    public List<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
+    public Flux<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         String aggregateCursor, AggregationOptions options
     ) {
-        return List.of();
+        return null;
     }
 
     @Override
