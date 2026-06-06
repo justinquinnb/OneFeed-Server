@@ -58,8 +58,9 @@ public class AggregationService implements Aggregator<OneFeedContent> {
             Normalizer<RawContent, OneFeedContent> normalizer =
                 (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
             String feedName = feed.getId().getName();
+
             Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
-                targetAmounts.get(feedName));
+                targetAmounts.get(feed.getId().toIdString()));
 
             normalizedContentStreams.add(
                 feedStream
@@ -90,7 +91,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
                 (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
             String feedName = feed.getId().getName();
             Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
-                targetAmounts.get(feedName), cursors.get(feedName));
+                targetAmounts.get(feed.getId().toIdString()), cursors.get(feedName));
 
             normalizedContentStreams.add(
                 feedStream

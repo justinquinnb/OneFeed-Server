@@ -47,10 +47,15 @@ public class AggregationOptions {
      */
     public HashMap<String, Integer> getTargetAmounts(int targetSum) {
         int weightSum = feedWeights.values().stream().mapToInt(Integer::intValue).sum();
+        if (weightSum == 0) {
+            weightSum = this.feedWeights.size();
+        }
+
         HashMap<String, Integer> targetAmounts = new HashMap<>();
 
         for (String feedId : feedWeights.keySet()) {
-            targetAmounts.put(feedId, (targetSum * (feedWeights.get(feedId) / weightSum)));
+            double proportionalAmount = (double) targetSum * feedWeights.get(feedId) / weightSum;
+            targetAmounts.put(feedId, (int) Math.ceil(proportionalAmount));
         }
 
         return targetAmounts;
@@ -62,8 +67,8 @@ public class AggregationOptions {
      */
     private static void validateFeedWeights(HashMap<String, Integer> feedWeights) {
         for (int weight : feedWeights.values()) {
-            if (weight <= 1) {
-                throw new IllegalArgumentException("All feed weights must be greater than 1");
+            if (weight < 1) {
+                throw new IllegalArgumentException("All feed weights must be greater than 0");
             }
         }
     }
