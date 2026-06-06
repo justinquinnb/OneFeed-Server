@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public final class AuthorUpdate implements StreamData {
+public final class AuthorUpdate extends StreamData {
 
     /**
      * The unique identifier of the feed the author has, well... authored
@@ -26,6 +26,7 @@ public final class AuthorUpdate implements StreamData {
      * @param author the author to be sent to the client
      */
     public AuthorUpdate(Author author) {
+        super();
         this.author = author;
     }
 }
