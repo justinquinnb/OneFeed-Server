@@ -1,0 +1,53 @@
+package dev.jqb.onefeed.app.model;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+/**
+ * A weight for a feed in an aggregation request
+ */
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@FeedWeightConstraint
+public class CustomAggregationDto {
+    @Size(min=1, message="At least one feed must be specified")
+    private List<FeedWeight> feedWeights;
+
+    @Getter
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FeedWeight {
+        /**
+         * Corresponds to a {@link dev.jqb.onefeed.api.feed.FeedIdentifier}
+         */
+        @NotBlank
+        private String feedId;
+
+        /**
+         * An optional weight for the feed
+         */
+        @Min(1)
+        private Integer weight = 1;
+
+        /**
+         * Constructs a new {@code FeedWeight} with the given feed ID and no weight.
+         * @param feedId the ID of the feed
+         * @see dev.jqb.onefeed.api.feed.FeedIdentifier#fromIdString(String)
+         */
+        public FeedWeight (String feedId) {
+            this.feedId = feedId;
+        }
+    }
+}

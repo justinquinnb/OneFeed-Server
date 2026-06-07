@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Getter;
 import lombok.Setter;
+import org.pf4j.PluginStateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -51,12 +52,11 @@ public class PluginConfig {
 
     @Bean
     public OneFeedPluginManager oneFeedPluginManager(PluginConfigsFile pluginConfigsFile,
-        PluginTypeRegistry pluginTypeRegistry, FeedRegistry feedRegistry
+        PluginTypeRegistry pluginTypeRegistry, FeedRegistry feedRegistry,
+        PluginStateListener pluginStateListener
     ) {
         OneFeedPluginManager pluginManager = new OneFeedPluginManager(Path.of(directoryPath),
             pluginConfigsFile);
-        OneFeedPluginStateListener pluginStateListener =
-            new OneFeedPluginStateListener(pluginTypeRegistry, feedRegistry);
 
         // Register the listener with the plugin manager
         pluginManager.addPluginStateListener(pluginStateListener);

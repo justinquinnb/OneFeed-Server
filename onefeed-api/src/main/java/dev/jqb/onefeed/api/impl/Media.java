@@ -22,14 +22,16 @@ public class Media {
     private MediaType type;
 
     /**
-     * The title or name of the media (such as the title of a link)
-     */
-    private String title;
-
-    /**
      * The link to view the media on its host site
      */
     private String href;
+
+    /**
+     * The title or name of the media (such as the title of a link)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Nullable
+    private String title;
 
     /**
      * The media resource itself, for direct embedding
@@ -57,19 +59,17 @@ public class Media {
      */
     @Nullable
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String alt;
+    private String altText;
 
     /**
      * Constructs a piece of {@link Media}.
      *
      * @param type the type of media the constructed object represents, guiding its fields' semantic
      *             interpretation or presentation by the client
-     * @param title the title or "name" of the piece of media
      * @param href the click-through link to view the media on its host platform
      */
-    public Media(MediaType type, String title, String href) {
+    public Media(MediaType type, String href) {
         this.type = type;
-        this.title = title;
         this.href = href;
     }
 

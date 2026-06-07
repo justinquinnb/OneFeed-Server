@@ -1,6 +1,7 @@
 package dev.jqb.onefeed.api.content;
 
 import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.feed.SourceInfo;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
-public abstract class RawContent extends Content {
+public abstract non-sealed class RawContent extends Content {
 
     /**
      * Constructs a piece of {@code RawContent} attributed to a {@code source} and created/published

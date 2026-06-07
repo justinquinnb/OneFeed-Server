@@ -1,11 +1,12 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.ContentFilter;
 import dev.jqb.onefeed.api.content.Normalizer;
+import dev.jqb.onefeed.api.content.PlatformCursor;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
+import dev.jqb.onefeed.api.impl.Profile;
 import java.util.HashMap;
-import java.util.List;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -19,51 +20,33 @@ public interface Provider<Out extends RawContent> {
      * Fetches the given {@code amount} of most recently published content from {@code this}
      * provider's content source for the given feed {@code name}.
      * 
-     * @param name the name of the feed whose content to retrieve
+     * @param feedName the name of the feed whose content to retrieve
      * @param amount the target amount of content to retrieve
-     * @param filters the filters to try applying if supported by the API or best performed on the 
-     *                {@link Out} content itself
-     * @param config a map of feed-specific configuration options for this specific request
-     *               
-     * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
+     *
+     * @return a {@link Flux} that emits a stream of {@link Out} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Mono<FilteredContent<Out>> fetchRecentContent(
-        String name,
-        int amount,
-        List<ContentFilter<?>> filters,
-        HashMap<String, String> config
-    );
+    Flux<Out> fetchRecentContent(String feedName, int amount);
 
     /**
      * Fetches the given {@code amount} of most recently published content after the {@code cursor}
      * from {@code this} provider's content source for the given feed {@code name}.
      *
-     * @param name the name of the feed whose content to retrieve
+     * @param feedName the name of the feed whose content to retrieve
      * @param amount the target amount of content to retrieve
-     * @param cursor the point to start retrieving content AFTER, however that's best represented
-     *               by this provider's platform's API
-     * @param filters the filters to try applying if supported by the API or best performed on the
-     *                {@link Out} content itself
-     * @param config a map of feed-specific configuration options for this specific request
+     * @param cursor the reference point to start retrieving content from, inclusive
      *
-     * @return a {@link Mono} that emits a {@link FilteredContent} containing at most the desired
+     * @return a {@link Flux} that emits a stream of {@link Out} containing at most the desired
      * {@code amount} of retrieved content
      */
-    Mono<FilteredContent<Out>> fetchRecentContent(
-        String name,
-        int amount,
-        String cursor,
-        List<ContentFilter<?>> filters,
-        HashMap<String, String> config
-    );
+    Flux<Out> fetchRecentContent(String feedName, int amount, PlatformCursor cursor);
 
     /**
      * Gets the {@link Normalizer} capable of transforming this provider's
      * {@link RawContent} DTO into normalized {@link OneFeedContent}
      *
-     * @return a {@link Normalizer} capable of transforming this provider's
-     * {@link RawContent} DTO into normalized {@link OneFeedContent}
+     * @return a {@link Normalizer} capable of transforming this provider's {@link RawContent} DTO
+     * into normalized {@link OneFeedContent}
      */
     Normalizer<Out, OneFeedContent> getNormalizer();
 

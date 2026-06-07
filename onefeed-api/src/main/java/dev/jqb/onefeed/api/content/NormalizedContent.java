@@ -1,6 +1,7 @@
 package dev.jqb.onefeed.api.content;
 
 import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.feed.SourceInfo;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public abstract class NormalizedContent extends Content {
+public abstract non-sealed class NormalizedContent extends Content {
 
     /**
      * Constructs a piece of {@code NormalizedContent} attributed to a {@code source} and

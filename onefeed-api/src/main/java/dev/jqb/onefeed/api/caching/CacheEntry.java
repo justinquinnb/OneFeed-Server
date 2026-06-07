@@ -1,20 +1,19 @@
 package dev.jqb.onefeed.api.caching;
 
+import dev.jqb.onefeed.api.feed.FeedIdentifiable;
 import java.time.Instant;
 import lombok.Getter;
 
 /**
  * An entry to some cache for an object of type {@code T}
- *
- * @param <T> the type of object being cached
  */
 @Getter
-public class CacheEntry<T> {
+public class CacheEntry {
 
     /**
      * The actual data being cached
      */
-    public T data;
+    public FeedIdentifiable data;
 
     /**
      * The last time the data the cache entry is for has been retrieved from its source. An
@@ -35,7 +34,7 @@ public class CacheEntry<T> {
      * @param expireOn the moment the data can be considered "expired" and ready for removal from
      *                 the cache
      */
-    public CacheEntry(T data, Instant lastRetrieved, Instant expireOn) {
+    public CacheEntry(FeedIdentifiable data, Instant lastRetrieved, Instant expireOn) {
         this.data = data;
         this.lastRetrieved = lastRetrieved;
         this.expireOn = expireOn;
