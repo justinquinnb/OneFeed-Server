@@ -1,11 +1,10 @@
 package dev.jqb.onefeed.api.feed;
 
 import dev.jqb.onefeed.api.content.Normalizer;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.content.PlatformCursor;
-import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.Profile;
-import java.util.HashMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +13,7 @@ import reactor.core.publisher.Mono;
  *
  * @param <Out> the type of DTO that the provider produces
  */
-public interface Provider<Out extends RawContent> {
+public interface Provider<Out extends PlatformContent> {
 
     /**
      * Fetches the given {@code amount} of most recently published content from {@code this}
@@ -43,9 +42,9 @@ public interface Provider<Out extends RawContent> {
 
     /**
      * Gets the {@link Normalizer} capable of transforming this provider's
-     * {@link RawContent} DTO into normalized {@link OneFeedContent}
+     * {@link PlatformContent} DTO into normalized {@link OneFeedContent}
      *
-     * @return a {@link Normalizer} capable of transforming this provider's {@link RawContent} DTO
+     * @return a {@link Normalizer} capable of transforming this provider's {@link PlatformContent} DTO
      * into normalized {@link OneFeedContent}
      */
     Normalizer<Out, OneFeedContent> getNormalizer();

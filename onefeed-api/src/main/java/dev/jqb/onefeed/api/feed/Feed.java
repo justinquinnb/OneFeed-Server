@@ -1,13 +1,13 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import lombok.Getter;
 
 /**
  * A single feed of content from a single provider
  */
 @Getter
-public class Feed<Out extends RawContent> {
+public class Feed<Out extends PlatformContent> {
 
     /**
      * The unique identifier of the feed

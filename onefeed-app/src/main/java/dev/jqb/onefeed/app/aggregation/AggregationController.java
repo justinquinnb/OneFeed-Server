@@ -3,8 +3,7 @@ package dev.jqb.onefeed.app.aggregation;
 import dev.jqb.onefeed.api.aggregation.AggregateCursorGenerator;
 import dev.jqb.onefeed.api.aggregation.AggregationOptions;
 import dev.jqb.onefeed.api.content.Content;
-import dev.jqb.onefeed.api.content.PlatformCursor;
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
@@ -85,9 +84,9 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
             FeedIdentifier.fromIdString(fw.getFeedId())).toList();
 
         // Try to get the associated feeds, if the IDs are valid
-        List<Feed<? extends RawContent>> feeds = new ArrayList<>(ids.size());
+        List<Feed<? extends PlatformContent>> feeds = new ArrayList<>(ids.size());
         for (FeedIdentifier id : ids) {
-            Feed<? extends RawContent> feed = feedRegistry.getFeed(id);
+            Feed<? extends PlatformContent> feed = feedRegistry.getFeed(id);
             if (feed == null) {
                 throw new IllegalArgumentException("Invalid feed ID: " + id);
             }
@@ -128,7 +127,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         if (includeAuthors) {
             List<Mono<Profile>> authorMonos = new ArrayList<>(feeds.size());
 
-            for (Feed<? extends RawContent> feed : feeds) {
+            for (Feed<? extends PlatformContent> feed : feeds) {
                 authorMonos.add(feed.getProvider().getProfile(feed.getId().getFeedName()));
             }
 

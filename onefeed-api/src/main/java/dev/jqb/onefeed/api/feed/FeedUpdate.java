@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.impl.Profile;
 import java.util.List;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class FeedUpdate<T extends RawContent> {
+public class FeedUpdate<T extends PlatformContent> {
 
     /**
      * Any new content that was added to the feed

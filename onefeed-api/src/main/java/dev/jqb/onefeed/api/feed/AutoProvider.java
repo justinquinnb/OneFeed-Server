@@ -1,13 +1,13 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 
 /**
  * Denotes a {@link Provider} capable of notifying OneFeed when a feed has been updated via webhooks
  *
- * @param <Out> the type of {@link RawContent} produced
+ * @param <Out> the type of {@link PlatformContent} produced
  */
-public interface AutoProvider<Out extends RawContent> extends Provider<Out> {
+public interface AutoProvider<Out extends PlatformContent> extends Provider<Out> {
 
     /**
      * Gets the updated content that the webhook notification is making us aware of

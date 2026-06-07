@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.app.aggregation;
 
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.feed.Provider;
@@ -80,7 +80,7 @@ public class FeedRegistry {
      *
      * @see FeedIdentifier#toIdString()
      */
-    public Feed<? extends RawContent> getFeed(FeedIdentifier feedId) {
+    public Feed<? extends PlatformContent> getFeed(FeedIdentifier feedId) {
         return new Feed<>(feedId, getProvider(feedId));
     }
 }
