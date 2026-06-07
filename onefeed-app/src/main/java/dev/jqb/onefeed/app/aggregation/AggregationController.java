@@ -42,7 +42,7 @@ import tools.jackson.databind.json.JsonMapper;
 @RestController
 @Validated
 @RequestMapping("/aggregation")
-public class AggregationController implements AggregateCursorGenerator<Content> {
+public class AggregationController implements AggregateCursorGenerator<OneFeedContent> {
     private static final Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
     private final JsonMapper jsonMapper;
@@ -107,12 +107,43 @@ public class AggregationController implements AggregateCursorGenerator<Content> 
 
         // Get the content stream
         AggregationOptions aggOptions = new AggregationOptions(dedupe, weights);
-        Flux<ContentUpdate<OneFeedContent>> contentStream = aggregationService.aggregate(
-            amount, feeds, aggOptions
-        ).map(ContentUpdate::new);
+        Flux<OneFeedContent> contentStream;
+
+        if (aggregateCursor != null && !aggregateCursor.isBlank()) {
+            Map<String, String> cursors = decodeAggregateCursor(aggregateCursor);
+            for (String feedId : cursors.keySet()) {
+                logger.info("Discovered {} cursor: {}", feedId, cursors.get(feedId));
+            }
+
+            contentStream = aggregationService.aggregate(amount, feeds, cursors, aggOptions);
+        } else {
+            contentStream = aggregationService.aggregate(amount, feeds, aggOptions);
+        }
+
+        // Gradually calculate the aggregate cursor
+        // Feed name -> oldest content for that feed
+        ConcurrentHashMap<String, OneFeedContent> oldestFeedContent = new ConcurrentHashMap<>();
+
+        Flux<ContentUpdate<OneFeedContent>> contentUpdateStream = contentStream
+            .doOnNext(c -> {
+                // Skip if the content has no next page
+                if (c.getNextPageCursor() == null) {
+                    return;
+                }
+
+                String feedId = c.getSource().getFeedId().toIdString();
+
+                // Associate the current content piece with the feed if no entry exists already
+                if (!oldestFeedContent.containsKey(feedId) ||
+                    c.getPublished().isBefore(oldestFeedContent.get(feedId).getPublished())
+                ) {
+                    oldestFeedContent.put(feedId, c);
+                }
+            })
+            .map(ContentUpdate::new);
 
         // Optionally get the author stream
-        Flux<AuthorUpdate> authorStream;
+        Flux<AuthorUpdate> authorUpdateStream;
         if (includeAuthors) {
             List<Mono<Profile>> authorMonos = new ArrayList<>(feeds.size());
 
@@ -120,12 +151,14 @@ public class AggregationController implements AggregateCursorGenerator<Content> 
                 authorMonos.add(feed.getProvider().getProfile(feed.getId().getName()));
             }
 
-            authorStream = Flux.merge(authorMonos).map(AuthorUpdate::new);
+            authorUpdateStream = Flux.merge(authorMonos).map(AuthorUpdate::new);
         } else {
-            authorStream = Flux.empty();
+            authorUpdateStream = Flux.empty();
         }
 
-        return Flux.merge(contentStream, authorStream);
+        return Flux.merge(contentUpdateStream, authorUpdateStream).concatWith(
+            Mono.fromCallable(() -> new CursorUpdate(generateAggregateCursor(oldestFeedContent)))
+        );
     }
 
     /**
@@ -146,8 +179,13 @@ public class AggregationController implements AggregateCursorGenerator<Content> 
     }
 
     @Override
-    public String generateAggregateCursor(Map<String, String> cursorMap) {
-        byte[] jsonBytes = jsonMapper.writeValueAsBytes(cursorMap);
+    public String generateAggregateCursor(Map<String, OneFeedContent> cursorMap) {
+        HashMap<String, String> encodedMap = new HashMap<>();
+        for (Map.Entry<String, OneFeedContent> entry : cursorMap.entrySet()) {
+            encodedMap.put(entry.getKey(), entry.getValue().getNextPageCursor());
+        }
+
+        byte[] jsonBytes = jsonMapper.writeValueAsBytes(encodedMap);
         return Base64.getEncoder().encodeToString(jsonBytes);
     }
 
