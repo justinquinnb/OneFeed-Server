@@ -4,6 +4,8 @@ package dev.jqb.onefeed.api.aggregation;
 import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.content.NormalizedContent;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
+import dev.jqb.onefeed.api.impl.OneFeedCursor;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,20 +14,19 @@ import java.util.Map;
  */
 public interface AggregateCursorGenerator<In extends NormalizedContent> {
     /**
-     * Generates an aggregate nextPageCursor from the cursors of the oldest content per feed.
+     * Generates an aggregate cursor {@code String} from a list of {@code content}.
      *
-     * @param cursorMap a mapping of Feed ID strings to the cursor used to retrieve its next page
-     *                  of content
+     * @param content a list of the content to generate the cursor from
      * @return the aggregate nextPageCursor, encoded in base 64
      */
-    String generateAggregateCursor(Map<String, In> cursorMap);
+    String generateAggregateCursor(List<In> content);
 
     /**
      * Decodes an aggregate nextPageCursor into a map of Feed IDs to cursors.
      *
      * @param aggregateCursor the aggregate nextPageCursor, encoded in base 64, to decode
-     * @return a mapping of feed ID strings to cursors
+     * @return a mapping of feed ID strings to {@link OneFeedCursor}s
      * @see dev.jqb.onefeed.api.feed.FeedIdentifier#toIdString()
      */
-    Map<String, String> decodeAggregateCursor(String aggregateCursor);
+    Map<FeedIdentifier, OneFeedCursor> decodeAggregateCursor(String aggregateCursor);
 }

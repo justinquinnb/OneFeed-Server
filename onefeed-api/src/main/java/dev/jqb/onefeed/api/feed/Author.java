@@ -39,6 +39,6 @@ public class Author implements FeedIdentifiable {
 
     @Override
     public FeedIdentifier getFeedIdentifier() {
-        return source.getFeedId();
+        return source;
     }
 }

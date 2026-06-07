@@ -16,7 +16,7 @@ public class SourceInfo extends ContentIdentifier {
     /**
      * The URL of the resource on its feed's platform
      */
-    private String urlOnPlatform;
+    private final String urlOnPlatform;
 
     /**
      * Constructs a new {@code ContentIdentifier} for the given provider ID, feed name, and

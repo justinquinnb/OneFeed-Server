@@ -12,10 +12,6 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true)
 public class ContentIdentifier extends FeedIdentifier {
-    /**
-     * The unique identifier of the feed the content is from
-     */
-    private FeedIdentifier feedId;
 
     /**
      * The unique identifier of the entity on its source platform

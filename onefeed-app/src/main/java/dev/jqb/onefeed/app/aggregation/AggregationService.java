@@ -4,8 +4,10 @@ import dev.jqb.onefeed.api.aggregation.AggregationOptions;
 import dev.jqb.onefeed.api.aggregation.Aggregator;
 import dev.jqb.onefeed.api.caching.Cacher;
 import dev.jqb.onefeed.api.content.Normalizer;
+import dev.jqb.onefeed.api.content.PlatformCursor;
 import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
+import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.feed.Provider;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import java.util.ArrayList;
@@ -39,19 +41,18 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     public Flux<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
         AggregationOptions options
     ) {
-        HashMap<String, Integer> targetAmounts = options.getTargetAmounts(amount);
+        Map<FeedIdentifier, Integer> targetAmounts = options.getTargetAmounts(amount);
         List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
 
         for (Feed<? extends RawContent> feed : feeds) {
             Provider<? extends RawContent> provider = feed.getProvider();
             Normalizer<RawContent, OneFeedContent> normalizer =
                 (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
-            String feedName = feed.getId().getName();
+            String feedName = feed.getId().getFeedName();
 
             // TODO check cache first
-
             Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
-                targetAmounts.get(feed.getId().toIdString()));
+                targetAmounts.get(feed.getId()));
 
             normalizedContentStreams.add(
                 feedStream
@@ -70,22 +71,21 @@ public class AggregationService implements Aggregator<OneFeedContent> {
 
     @Override
     public Flux<OneFeedContent> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
-        Map<String, String> cursors, AggregationOptions options
+        Map<FeedIdentifier, ? extends PlatformCursor> cursors, AggregationOptions options
     ) {
-        Map<String, Integer> targetAmounts = options.getTargetAmounts(amount);
+        Map<FeedIdentifier, Integer> targetAmounts = options.getTargetAmounts(amount);
         List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
 
         for (Feed<? extends RawContent> feed : feeds) {
             Provider<? extends RawContent> provider = feed.getProvider();
             Normalizer<RawContent, OneFeedContent> normalizer =
                 (Normalizer<RawContent, OneFeedContent>) provider.getNormalizer();
-            String feedName = feed.getId().getName();
-            String feedId = feed.getId().toIdString();
+            String feedName = feed.getId().getFeedName();
 
             // TODO check cache first
 
             Flux<? extends RawContent> feedStream = provider.fetchRecentContent(feedName,
-                targetAmounts.get(feedId), cursors.get(feedId), 0);
+                targetAmounts.get(feed.getId()), cursors.get(feed.getId()));
 
             normalizedContentStreams.add(
                 feedStream

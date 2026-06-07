@@ -15,10 +15,10 @@ import org.jspecify.annotations.Nullable;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
-public abstract sealed class Content implements FeedIdentifiable permits RawContent,
-    NormalizedContent
+@NoArgsConstructor
+public abstract sealed class Content implements FeedIdentifiable, Comparable<Content>
+    permits RawContent, NormalizedContent
 {
 
     /**
@@ -53,8 +53,22 @@ public abstract sealed class Content implements FeedIdentifiable permits RawCont
         this.published = published;
     }
 
+    /**
+     * Compares this {@code Content} to another {@code Content} by their published time, producing
+     * a descending, chronological order appropriate for feeds.
+     *
+     * @param other the other piece of content to compare to
+     * @return the comparator value, that is less than zero if {@code other.published} time is
+     * before this {@code published} time, zero if they are equal, or greater than zero if
+     * {@code other.published} is after  this {@code published} time
+     */
+    @Override
+    public int compareTo(Content other) {
+        return other.published.compareTo(published);
+    }
+
     @Override
     public FeedIdentifier getFeedIdentifier() {
-        return source.getFeedId();
+        return source;
     }
 }

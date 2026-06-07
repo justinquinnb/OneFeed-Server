@@ -1,6 +1,10 @@
 package dev.jqb.onefeed.api.feed;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -10,6 +14,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@EqualsAndHashCode
 public class FeedIdentifier {
 
     /**
@@ -36,6 +42,7 @@ public class FeedIdentifier {
      * Converts this {@code FeedIdentifier} to a string suitable for use as a unique key
      * @return a string of format: {@code <}{@link #providerId}{@code >:<}{@link #feedName}{@code >}
      */
+    @JsonValue
     public String toIdString() {
         return providerId + ":" + feedName;
     }
@@ -46,6 +53,7 @@ public class FeedIdentifier {
      * @param idString the string to convert
      * @return a {@code FeedIdentifier} object representing the given string
      */
+    @JsonCreator
     public static FeedIdentifier fromIdString(String idString) {
         String[] parts = idString.split(":");
         return new FeedIdentifier(parts[0], parts[1]);
