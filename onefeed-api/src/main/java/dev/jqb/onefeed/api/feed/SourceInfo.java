@@ -1,42 +1,34 @@
 package dev.jqb.onefeed.api.feed;
 
+import dev.jqb.onefeed.api.content.ContentIdentifier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * A minimum description of a platform entity's origin
+ * A complete identifier for a piece of content on a feed from a platform's provider in OneFeed
  */
 @Getter
 @Setter
-@ToString
-public class SourceInfo {
-
-    /**
-     * The unique identifier of the feed the content is from
-     */
-    private FeedIdentifier feedId;
-
-    /**
-     * The unique identifier of the entity on its source platform
-     */
-    private String idOnPlatform;
+@ToString(callSuper = true)
+public class SourceInfo extends ContentIdentifier {
 
     /**
      * The URL of the resource on its feed's platform
      */
-    private String url;
+    private String urlOnPlatform;
 
     /**
-     * Constructs a new {@code SourceInfo} bundle.
+     * Constructs a new {@code ContentIdentifier} for the given provider ID, feed name, and
+     * platform-specific content ID and source URL.
      *
-     * @param feedId the provider-unique identifier of the feed the content is from
+     * @param providerId the unique identifier of the provider plugin exposing the feed
+     * @param feedName the name of the feed as exposed by the provider
      * @param idOnPlatform the unique identifier of the content on its source platform
-     * @param url the URL of the content resource on its feed's platform
+     * @param urlOnPlatform the URL of the content on its source platform
      */
-    public SourceInfo(FeedIdentifier feedId, String idOnPlatform, String url) {
-        this.feedId = feedId;
-        this.idOnPlatform = idOnPlatform;
-        this.url = url;
+    public SourceInfo(String providerId, String feedName, String idOnPlatform, String urlOnPlatform) {
+        super(providerId, feedName, idOnPlatform);
+        this.urlOnPlatform = urlOnPlatform;
     }
 }

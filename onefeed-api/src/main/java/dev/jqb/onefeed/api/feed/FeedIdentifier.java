@@ -20,28 +20,28 @@ public class FeedIdentifier {
     /**
      * The name of the feed as exposed by the provider
      */
-    private String name;
+    private String feedName;
 
     /**
      * Constructs a new {@code FeedIdentifier} for the given provider and feed name.
      * @param providerId the unique identifier of the provider plugin exposing the feed
-     * @param name the name of the feed as exposed by the provider
+     * @param feedName the name of the feed as exposed by the provider
      */
-    public FeedIdentifier(String providerId, String name) {
+    public FeedIdentifier(String providerId, String feedName) {
         this.providerId = providerId;
-        this.name = name;
+        this.feedName = feedName;
     }
 
     /**
      * Converts this {@code FeedIdentifier} to a string suitable for use as a unique key
-     * @return a string of format: {@code <}{@link #providerId}{@code >:<}{@link #name}{@code >}
+     * @return a string of format: {@code <}{@link #providerId}{@code >:<}{@link #feedName}{@code >}
      */
     public String toIdString() {
-        return providerId + ":" + name;
+        return providerId + ":" + feedName;
     }
 
     /**
-     * Converts a string of format {@code <}{@link #providerId}{@code >:<}{@link #name}{@code >}
+     * Converts a string of format {@code <}{@link #providerId}{@code >:<}{@link #feedName}{@code >}
      * into a {@code FeedIdentifier} object.
      * @param idString the string to convert
      * @return a {@code FeedIdentifier} object representing the given string
