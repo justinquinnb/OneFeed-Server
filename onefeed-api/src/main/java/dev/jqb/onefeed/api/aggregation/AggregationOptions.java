@@ -18,11 +18,6 @@ import lombok.ToString;
 public class AggregationOptions {
 
     /**
-     * Whether to dedupe the content in the aggregation
-     */
-    private boolean dedupe;
-
-    /**
      * The weight of each feed in the aggregation, relative to each other. There is no max sum, but
      * all weights must be greater than 1
      */
@@ -31,13 +26,11 @@ public class AggregationOptions {
     /**
      * Creates a bundle of aggregation options.
      *
-     * @param dedupe whether to dedupe the content in the aggregation
      * @param feedWeights the weight of each feed in the aggregation, relative to each other. There
      *                    is no max sum, but all weights must be greater than 1.
      */
-    public AggregationOptions(boolean dedupe, Map<FeedIdentifier, Integer> feedWeights) {
+    public AggregationOptions(Map<FeedIdentifier, Integer> feedWeights) {
         validateFeedWeights(feedWeights);
-        this.dedupe = dedupe;
         this.feedWeights = feedWeights;
     }
 

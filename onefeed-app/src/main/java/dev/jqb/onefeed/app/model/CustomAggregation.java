@@ -19,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @FeedWeightConstraint
-public class CustomAggregationDto {
+public class CustomAggregation {
     @Size(min=1, message="At least one feed must be specified")
     private List<FeedWeight> feedWeights;
 

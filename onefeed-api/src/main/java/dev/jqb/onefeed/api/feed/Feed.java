@@ -1,6 +1,7 @@
 package dev.jqb.onefeed.api.feed;
 
 import dev.jqb.onefeed.api.content.PlatformContent;
+import dev.jqb.onefeed.api.provider.Provider;
 import lombok.Getter;
 
 /**

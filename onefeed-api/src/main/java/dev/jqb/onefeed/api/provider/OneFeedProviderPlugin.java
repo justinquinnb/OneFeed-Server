@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.api.feed;
+package dev.jqb.onefeed.api.provider;
 
 import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.plugin.OneFeedPlugin;

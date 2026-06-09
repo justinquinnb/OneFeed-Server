@@ -1,8 +1,9 @@
-package dev.jqb.onefeed.api.feed;
+package dev.jqb.onefeed.api.provider;
 
 import dev.jqb.onefeed.api.content.Normalizer;
 import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.content.PlatformCursor;
+import dev.jqb.onefeed.api.feed.Platform;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.Profile;
 import reactor.core.publisher.Flux;

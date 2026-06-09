@@ -8,7 +8,7 @@ import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.content.PlatformCursor;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.provider.Provider;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
                 feedStream
                     .map(normalizer::normalize)
                     .doOnError(err -> logger.warn(
-                        "Error fetching content from feed \"{}\": {}", feedName, err.getStackTrace()))
+                        "Error fetching content from feed '{}': {}", feedName, err.getStackTrace()))
                     .onErrorComplete()
             );
         }
@@ -90,7 +90,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
                 feedStream
                     .map(normalizer::normalize)
                     .doOnError(err -> logger.warn(
-                        "Error fetching content from feed \"{}\": {}", feedName, err.getStackTrace()))
+                        "Error fetching content from feed '{}': {}", feedName, err.getStackTrace()))
                     .onErrorComplete()
             );
         }

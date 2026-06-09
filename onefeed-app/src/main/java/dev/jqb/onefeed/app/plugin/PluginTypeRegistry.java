@@ -28,7 +28,7 @@ public class PluginTypeRegistry {
      */
     public void registerTypesFrom(PluginWrapper wrapper) {
         String pluginId = wrapper.getPluginId();
-        logger.debug("Registering types for plugin \"{}\" to support later deserialization",
+        logger.debug("Registering types for plugin '{}' to support later deserialization",
             pluginId);
 
         OneFeedPlugin plugin = (OneFeedPlugin) wrapper.getPlugin();
@@ -41,7 +41,7 @@ public class PluginTypeRegistry {
             pluginIdToFqns.computeIfAbsent(pluginId, k -> new ArrayList<>())
                 .add(fqn);
 
-            logger.trace("Registered type \"{}\"", customClass.getName());
+            logger.trace("Registered type '{}'", customClass.getName());
         }
     }
 
@@ -50,12 +50,12 @@ public class PluginTypeRegistry {
      * @param pluginId the ID of the plugin whose types to deregister
      */
     public void deregisterTypesFrom(String pluginId) {
-        logger.debug("Deregistering types for plugin \"{}\"", pluginId);
+        logger.debug("Deregistering types for plugin '{}'", pluginId);
         List<String> fqns = pluginIdToFqns.remove(pluginId);
         if (fqns != null) {
             for (String fqn : fqns) {
                 fqnToTypes.remove(fqn);
-                logger.trace("Deregistered type \"{}\"", fqn);
+                logger.trace("Deregistered type '{}'", fqn);
             }
         }
     }

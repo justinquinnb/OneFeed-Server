@@ -2,7 +2,7 @@ package dev.jqb.onefeed.api.plugin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.jqb.onefeed.api.caching.CacherConfig;
-import dev.jqb.onefeed.api.feed.ProviderConfig;
+import dev.jqb.onefeed.api.provider.ProviderConfig;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

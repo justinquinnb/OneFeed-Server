@@ -9,10 +9,11 @@ import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.OneFeedCursor;
 import dev.jqb.onefeed.api.impl.Profile;
+import dev.jqb.onefeed.api.feed.UnknownFeedIdException;
 import dev.jqb.onefeed.app.model.AuthorUpdate;
 import dev.jqb.onefeed.app.model.ContentUpdate;
 import dev.jqb.onefeed.app.model.CursorUpdate;
-import dev.jqb.onefeed.app.model.CustomAggregationDto;
+import dev.jqb.onefeed.app.model.CustomAggregation;
 import dev.jqb.onefeed.app.model.StreamData;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -66,18 +67,15 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
      * @param includeAuthors whether to include the authors of the aggregated content
      *                       (optional, defaults to {@code true})
      * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
-     * @param dedupe whether to dedupe the content in the aggregation (optional, defaults to
-     * {@code true})
      *
      * @return an aggregation of the desired amount of content from the given feeds
      */
     @PostMapping("/custom")
     public Flux<StreamData> getCustomAggregation(
         @RequestParam @Min(1) int amount,
-        @RequestBody @Valid CustomAggregationDto customAggregation,
+        @RequestBody @Valid CustomAggregation customAggregation,
         @RequestParam(defaultValue = "true") Boolean includeAuthors,
-        @RequestParam(required = false) String aggregateCursor,
-        @RequestParam(defaultValue = "true") Boolean dedupe
+        @RequestParam(required = false) String aggregateCursor
     ) {
         // Get the feed IDs first
         List<FeedIdentifier> ids = customAggregation.getFeedWeights().stream().map(fw ->
@@ -87,16 +85,12 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         List<Feed<? extends PlatformContent>> feeds = new ArrayList<>(ids.size());
         for (FeedIdentifier id : ids) {
             Feed<? extends PlatformContent> feed = feedRegistry.getFeed(id);
-            if (feed == null) {
-                throw new IllegalArgumentException("Invalid feed ID: " + id);
-            }
-
             feeds.add(feed);
         }
 
         // Convert the weights to the map required by the aggregator
         HashMap<FeedIdentifier, Integer> weights = new HashMap<>();
-        for (CustomAggregationDto.FeedWeight fw : customAggregation.getFeedWeights()) {
+        for (CustomAggregation.FeedWeight fw : customAggregation.getFeedWeights()) {
             if (fw.getWeight() == null) {
                 weights.put(FeedIdentifier.fromIdString(fw.getFeedId()), 1);
             } else {
@@ -105,7 +99,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         }
 
         // Get the content stream
-        AggregationOptions aggOptions = new AggregationOptions(dedupe, weights);
+        AggregationOptions aggOptions = new AggregationOptions(weights);
         Flux<OneFeedContent> contentStream;
 
         if (aggregateCursor != null && !aggregateCursor.isBlank()) {
@@ -204,10 +198,8 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
             String decoded = new String(Base64.getDecoder().decode(aggregateCursor));
             return jsonMapper.readValue(decoded,
                 new TypeReference<Map<FeedIdentifier, OneFeedCursor>>() {});
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid aggregate cursor format", e);
-        } catch (Exception e) { // Catch broader exceptions for JSON parsing issues
-            throw new IllegalArgumentException("Invalid aggregate cursor format", e);
+        } catch (Exception e) {
+            throw new MalformedAggregateCursorException();
         }
     }
 }

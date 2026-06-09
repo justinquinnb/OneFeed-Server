@@ -1,7 +1,7 @@
 package dev.jqb.onefeed.app.plugin;
 
-import dev.jqb.onefeed.api.feed.OneFeedProviderPlugin;
-import dev.jqb.onefeed.api.feed.ProviderConfig;
+import dev.jqb.onefeed.api.provider.OneFeedProviderPlugin;
+import dev.jqb.onefeed.api.provider.ProviderConfig;
 import dev.jqb.onefeed.api.plugin.PluginConfigsFile;
 import java.lang.reflect.Constructor;
 import org.pf4j.DefaultPluginFactory;

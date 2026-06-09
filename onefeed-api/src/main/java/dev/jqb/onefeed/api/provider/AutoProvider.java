@@ -1,6 +1,7 @@
-package dev.jqb.onefeed.api.feed;
+package dev.jqb.onefeed.api.provider;
 
 import dev.jqb.onefeed.api.content.PlatformContent;
+import dev.jqb.onefeed.api.feed.FeedUpdate;
 
 /**
  * Denotes a {@link Provider} capable of notifying OneFeed when a feed has been updated via webhooks

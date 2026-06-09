@@ -3,7 +3,8 @@ package dev.jqb.onefeed.app.aggregation;
 import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.feed.UnknownFeedIdException;
+import dev.jqb.onefeed.api.provider.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +34,7 @@ public class FeedRegistry {
         List<String> feedNames
     ) {
         String pluginId = wrapper.getPluginId();
-        logger.debug("Associating feed names with provider instance \"{}\"...",
+        logger.debug("Associating feed names with provider instance '{}'...",
             pluginId);
 
         for (String feedName : feedNames) {
@@ -41,7 +42,7 @@ public class FeedRegistry {
             feedIdToProvider.put(id.toIdString(), provider);
             pluginIdToFeedNames.computeIfAbsent(pluginId, k -> new ArrayList<>())
                 .add(feedName);
-            logger.trace("Associated feed \"{}\"", feedName);
+            logger.trace("Associated feed '{}'", feedName);
         }
     }
 
@@ -51,13 +52,13 @@ public class FeedRegistry {
      */
     public void deregisterFeedsFor(PluginWrapper wrapper) {
         String pluginId = wrapper.getPluginId();
-        logger.debug("Unregistering feeds for plugin \"{}\"", pluginId);
+        logger.debug("Unregistering feeds for plugin '{}'", pluginId);
         List<String> feedNames = pluginIdToFeedNames.remove(pluginId);
         if (feedNames != null) {
             for (String feedName : feedNames) {
                 FeedIdentifier id = new FeedIdentifier(pluginId, feedName);
                 feedIdToProvider.remove(id);
-                logger.trace("Unregistered feed \"{}\"", feedName);
+                logger.trace("Unregistered feed '{}'", feedName);
             }
         }
     }
@@ -81,6 +82,11 @@ public class FeedRegistry {
      * @see FeedIdentifier#toIdString()
      */
     public Feed<? extends PlatformContent> getFeed(FeedIdentifier feedId) {
+        Provider<? extends PlatformContent> provider = getProvider(feedId);
+        if (provider == null) {
+            throw new UnknownFeedIdException(feedId);
+        }
+
         return new Feed<>(feedId, getProvider(feedId));
     }
 }

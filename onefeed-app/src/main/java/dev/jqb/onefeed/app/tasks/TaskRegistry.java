@@ -45,7 +45,7 @@ public class TaskRegistry {
      * @param pluginId the ID of the plugin whose tasks to cancel
      */
     public void deregisterPluginTasks(String pluginId) {
-        logger.debug("Cancelling tasks for plugin \"{}\"", pluginId);
+        logger.debug("Cancelling tasks for plugin '{}'", pluginId);
         for (ScheduledFuture<?> task : pluginIdToTasks.remove(pluginId)) {
             task.cancel(true);
         }

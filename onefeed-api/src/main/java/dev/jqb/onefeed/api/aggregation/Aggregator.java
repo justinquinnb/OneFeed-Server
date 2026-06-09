@@ -5,7 +5,7 @@ import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.content.PlatformCursor;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.provider.Provider;
 import java.util.List;
 import java.util.Map;
 import reactor.core.publisher.Flux;
