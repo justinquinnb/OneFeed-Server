@@ -1,20 +1,24 @@
 package dev.jqb.onefeed.app.aggregation;
 
 import dev.jqb.onefeed.api.aggregation.AggregateCursorGenerator;
+import dev.jqb.onefeed.api.aggregation.Aggregation;
 import dev.jqb.onefeed.api.aggregation.AggregationOptions;
 import dev.jqb.onefeed.api.content.Content;
+import dev.jqb.onefeed.api.content.NormalizedContent;
 import dev.jqb.onefeed.api.content.PlatformContent;
+import dev.jqb.onefeed.api.feed.Author;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.OneFeedCursor;
 import dev.jqb.onefeed.api.impl.Profile;
-import dev.jqb.onefeed.api.feed.UnknownFeedIdException;
 import dev.jqb.onefeed.app.model.AuthorUpdate;
 import dev.jqb.onefeed.app.model.ContentUpdate;
 import dev.jqb.onefeed.app.model.CursorUpdate;
 import dev.jqb.onefeed.app.model.CustomAggregation;
+import dev.jqb.onefeed.app.model.CustomAggregation.WeightedFeed;
 import dev.jqb.onefeed.app.model.StreamData;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +46,7 @@ import tools.jackson.databind.json.JsonMapper;
 @RestController
 @Validated
 @RequestMapping("/aggregation")
+@Tag(name = "Aggregation", description = "Endpoints for aggregating content from multiple feeds")
 public class AggregationController implements AggregateCursorGenerator<OneFeedContent> {
     private static final Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
@@ -59,7 +64,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
     }
 
     /**
-     * Gets an aggregation of the desired amount of content from the given feeds.
+     * Gets a stream of content and authors representing the desired data from the given feeds.
      *
      * @param amount the total amount of content to retrieve
      * @param customAggregation the combination of feed IDs and optional weights to use in the
@@ -68,18 +73,19 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
      *                       (optional, defaults to {@code true})
      * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
      *
-     * @return an aggregation of the desired amount of content from the given feeds
+     * @return a stream of content and authors representing the desired data from the given feeds,
+     * emitted as soon as it's available
      */
-    @PostMapping("/custom")
-    public Flux<StreamData> getCustomAggregation(
+    @PostMapping("/stream/custom")
+    public Flux<StreamData> getCustomAggregationStream(
         @RequestParam @Min(1) int amount,
         @RequestBody @Valid CustomAggregation customAggregation,
         @RequestParam(defaultValue = "true") Boolean includeAuthors,
         @RequestParam(required = false) String aggregateCursor
     ) {
         // Get the feed IDs first
-        List<FeedIdentifier> ids = customAggregation.getFeedWeights().stream().map(fw ->
-            FeedIdentifier.fromIdString(fw.getFeedId())).toList();
+        List<FeedIdentifier> ids = customAggregation.getWeightedFeeds().stream().map(wf ->
+            FeedIdentifier.fromIdString(wf.getFeedId())).toList();
 
         // Try to get the associated feeds, if the IDs are valid
         List<Feed<? extends PlatformContent>> feeds = new ArrayList<>(ids.size());
@@ -90,7 +96,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
 
         // Convert the weights to the map required by the aggregator
         HashMap<FeedIdentifier, Integer> weights = new HashMap<>();
-        for (CustomAggregation.FeedWeight fw : customAggregation.getFeedWeights()) {
+        for (WeightedFeed fw : customAggregation.getWeightedFeeds()) {
             if (fw.getWeight() == null) {
                 weights.put(FeedIdentifier.fromIdString(fw.getFeedId()), 1);
             } else {
@@ -136,14 +142,63 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
     }
 
     /**
+     * Gets a complete aggregation of the desired amount of content from the given feeds.
+     *
+     * @param amount the total amount of content to retrieve
+     * @param customAggregation the combination of feed IDs and optional weights to use in the
+     *                          aggregation
+     * @param includeAuthors whether to include the authors of the aggregated content
+     *                       (optional, defaults to {@code true})
+     * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
+     *
+     * @return complete, structured aggregation data of the desired amount of content from the given
+     * feeds
+     */
+    @PostMapping("/batch/custom")
+    public Aggregation getCustomAggregationBatch(
+        @RequestParam @Min(1) int amount,
+        @RequestBody @Valid CustomAggregation customAggregation,
+        @RequestParam(defaultValue = "true") Boolean includeAuthors,
+        @RequestParam(required = false) String aggregateCursor
+    ) {
+        Flux<StreamData> stream =
+            getCustomAggregationStream(amount, customAggregation, includeAuthors, aggregateCursor);
+        List<StreamData> streamData = stream.collectList().block();
+
+        List<NormalizedContent> content = new ArrayList<>();
+        Map<FeedIdentifier, Author> authors = new HashMap<>();
+        String aggregateCursorStr = null;
+
+        // Organize the data
+        for (StreamData streamDataObj : streamData) {
+            switch (streamDataObj) {
+                case ContentUpdate<?> cu:
+                    content.add(cu.getContent());
+                    break;
+                case AuthorUpdate au:
+                    authors.put(au.getAuthor().getFeedIdentifier(), au.getAuthor());
+                    break;
+                case CursorUpdate cu:
+                    aggregateCursorStr = cu.getAggregateCursor();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Build the aggregation object
+        return new Aggregation(authors, content, aggregateCursorStr);
+    }
+
+    /**
      * Gets a preconfigured aggregation of the desired amount of content after the given cursor.
      *
      * @param id the ID of the preconfigured aggregation to retrieve
      * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
      * @return the preconfigured aggregation
      */
-    @GetMapping("/preconfigured/{id}")
-    public Flux<StreamData> getPreconfiguredAggregation(
+    @GetMapping("/stream/preset/{id}")
+    public Flux<StreamData> getPreconfiguredAggregationStream(
         @PathVariable @NotBlank String id,
         @RequestParam @Min(1) int amount,
         @RequestParam(required = false) String aggregateCursor

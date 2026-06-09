@@ -21,14 +21,14 @@ import lombok.ToString;
 @FeedWeightConstraint
 public class CustomAggregation {
     @Size(min=1, message="At least one feed must be specified")
-    private List<FeedWeight> feedWeights;
+    private List<WeightedFeed> weightedFeeds;
 
     @Getter
     @Setter
     @ToString
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class FeedWeight {
+    public static class WeightedFeed {
         /**
          * Corresponds to a {@link dev.jqb.onefeed.api.feed.FeedIdentifier}
          */
@@ -42,11 +42,11 @@ public class CustomAggregation {
         private Integer weight = 1;
 
         /**
-         * Constructs a new {@code FeedWeight} with the given feed ID and no weight.
+         * Constructs a new {@code WeightedFeed} with the given feed ID and no weight.
          * @param feedId the ID of the feed
          * @see dev.jqb.onefeed.api.feed.FeedIdentifier#fromIdString(String)
          */
-        public FeedWeight (String feedId) {
+        public WeightedFeed(String feedId) {
             this.feedId = feedId;
         }
     }

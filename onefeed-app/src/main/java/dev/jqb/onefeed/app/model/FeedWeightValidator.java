@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.app.model;
 
-import dev.jqb.onefeed.app.model.CustomAggregation.FeedWeight;
+import dev.jqb.onefeed.app.model.CustomAggregation.WeightedFeed;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,12 +13,12 @@ public class FeedWeightValidator implements ConstraintValidator<FeedWeightConstr
     public boolean isValid(CustomAggregation value, ConstraintValidatorContext context) {
         int numWeights = 0;
 
-        for (FeedWeight fw : value.getFeedWeights()) {
+        for (WeightedFeed fw : value.getWeightedFeeds()) {
             if (fw.getWeight() != null) {
                 numWeights++;
             }
         }
 
-        return numWeights == 0 || numWeights == value.getFeedWeights().size();
+        return numWeights == 0 || numWeights == value.getWeightedFeeds().size();
     }
 }
