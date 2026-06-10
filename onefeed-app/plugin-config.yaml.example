@@ -3,6 +3,7 @@ cacher-configs:
 provider-configs:
   onefeed-instagram-plugin:
     pluginVars:
+          useTotalMetricsForNormalization: "FALSE"
     feeds:
       "justinquinnb":
         loginType: "facebook"

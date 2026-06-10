@@ -1,5 +1,7 @@
 package dev.jqb.onefeed.api.provider;
 
+import dev.jqb.onefeed.api.impl.OneFeedAuthor;
+import dev.jqb.onefeed.api.impl.OneFeedContent;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ProviderConfig {
+
+    /**
+     * Whether to use the "lite" fetch mode, wherein the provider only requests the fields of
+     * authors and content that are required to complete {@link OneFeedContent} and
+     * {@link OneFeedAuthor} objects during normalization.
+     */
+    private boolean useLiteFetchMode = true;
 
     /**
      * Plugin-specific configuration of arbitrary shape
@@ -35,5 +44,13 @@ public class ProviderConfig {
     ) {
         this.pluginVars = pluginVars;
         this.feeds = feeds;
+    }
+
+    public boolean isUsingLiteFetchMode() {
+        return useLiteFetchMode;
+    }
+
+    public void setUsingLiteFetchMode(boolean useLiteFetchMode) {
+        this.useLiteFetchMode = useLiteFetchMode;
     }
 }
