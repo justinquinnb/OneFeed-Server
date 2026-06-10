@@ -3,15 +3,17 @@ package dev.jqb.onefeed.app.aggregation;
 import dev.jqb.onefeed.api.aggregation.AggregateCursorGenerator;
 import dev.jqb.onefeed.api.aggregation.Aggregation;
 import dev.jqb.onefeed.api.aggregation.AggregationOptions;
+import dev.jqb.onefeed.api.author.PlatformAuthor;
 import dev.jqb.onefeed.api.content.Content;
 import dev.jqb.onefeed.api.content.NormalizedContent;
 import dev.jqb.onefeed.api.content.PlatformContent;
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.OneFeedCursor;
-import dev.jqb.onefeed.api.impl.Profile;
+import dev.jqb.onefeed.api.impl.OneFeedAuthor;
+import dev.jqb.onefeed.app.author.AuthorService;
 import dev.jqb.onefeed.app.model.StreamedAuthor;
 import dev.jqb.onefeed.app.model.StreamedContent;
 import dev.jqb.onefeed.app.model.StreamedCursor;
@@ -55,13 +57,15 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
 
     private final JsonMapper jsonMapper;
     private final AggregationService aggregationService;
+    private final AuthorService authorService;
     private final FeedRegistry feedRegistry;
 
     @Autowired
-    public AggregationController(AggregationService aggregationService, FeedRegistry feedRegistry,
-        JsonMapper jsonMapper
+    public AggregationController(AggregationService aggregationService, AuthorService authorService,
+        FeedRegistry feedRegistry, JsonMapper jsonMapper
     ) {
         this.aggregationService = aggregationService;
+        this.authorService = authorService;
         this.feedRegistry = feedRegistry;
         this.jsonMapper = jsonMapper;
     }
@@ -91,9 +95,11 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
             FeedIdentifier.fromIdString(wf.getFeedId())).toList();
 
         // Try to get the associated feeds, if the IDs are valid
-        List<Feed<? extends PlatformContent>> feeds = new ArrayList<>(ids.size());
+        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds =
+            new ArrayList<>(ids.size());
         for (FeedIdentifier id : ids) {
-            Feed<? extends PlatformContent> feed = feedRegistry.getFeed(id);
+            Feed<? extends PlatformContent, ? extends PlatformAuthor> feed =
+                feedRegistry.getFeed(id);
             feeds.add(feed);
         }
 
@@ -128,13 +134,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         // Optionally get the author stream
         Flux<StreamedAuthor> authorUpdateStream;
         if (includeAuthors) {
-            List<Mono<Profile>> authorMonos = new ArrayList<>(feeds.size());
-
-            for (Feed<? extends PlatformContent> feed : feeds) {
-                authorMonos.add(feed.getProvider().fetchProfile(feed.getId().getFeedName()));
-            }
-
-            authorUpdateStream = Flux.merge(authorMonos).map(StreamedAuthor::new);
+            authorUpdateStream = authorService.getAuthors(feeds).map(StreamedAuthor::new);
         } else {
             authorUpdateStream = Flux.empty();
         }

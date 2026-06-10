@@ -1,13 +1,13 @@
 package dev.jqb.onefeed.app.author;
 
+import dev.jqb.onefeed.api.author.NormalizedAuthor;
+import dev.jqb.onefeed.api.author.PlatformAuthor;
 import dev.jqb.onefeed.api.content.PlatformContent;
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.app.aggregation.FeedRegistry;
-import dev.jqb.onefeed.app.model.StreamedAuthor;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,13 +47,15 @@ public class AuthorController {
      * API
      */
     @GetMapping("/stream")
-    public Flux<Author> getAuthorStream(@RequestParam @Size(min = 1) List<String> feedIds) {
+    public Flux<? extends NormalizedAuthor> getAuthorStream(
+        @RequestParam @Size(min = 1) List<String> feedIds
+    ) {
         List<FeedIdentifier> parsedFeedIds = feedIds.stream().map(FeedIdentifier::fromIdString)
             .toList();
 
-        List<Feed<? extends PlatformContent>> feeds = new ArrayList<>(parsedFeedIds.size());
+        List<Feed<?, ? extends PlatformAuthor>> feeds = new ArrayList<>(parsedFeedIds.size());
         for (FeedIdentifier id : parsedFeedIds) {
-            Feed<? extends PlatformContent> feed = feedRegistry.getFeed(id);
+            Feed<?, ? extends PlatformAuthor> feed = feedRegistry.getFeed(id);
             feeds.add(feed);
         }
 
@@ -68,7 +70,9 @@ public class AuthorController {
      * API
      */
     @GetMapping("/batch")
-    public List<Author> getAuthorBatch(@RequestParam @Size(min = 1) List<String> feedIds) {
+    public List<? extends NormalizedAuthor> getAuthorBatch(
+        @RequestParam @Size(min = 1) List<String> feedIds
+    ) {
         return getAuthorStream(feedIds).collectList().block();
     }
 }

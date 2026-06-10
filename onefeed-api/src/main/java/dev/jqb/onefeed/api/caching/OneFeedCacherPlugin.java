@@ -1,5 +1,7 @@
 package dev.jqb.onefeed.api.caching;
 
+import dev.jqb.onefeed.api.author.NormalizedAuthor;
+import dev.jqb.onefeed.api.content.NormalizedContent;
 import dev.jqb.onefeed.api.plugin.OneFeedPlugin;
 
 public abstract class OneFeedCacherPlugin extends OneFeedPlugin {
@@ -25,5 +27,5 @@ public abstract class OneFeedCacherPlugin extends OneFeedPlugin {
      * Gets the {@link Cacher} service that this plugin provides.
      * @return the {@link Cacher} service that this plugin provides
      */
-    public abstract Cacher getCacher();
+    public abstract Cacher<? extends NormalizedContent, ? extends NormalizedAuthor> getCacher();
 }

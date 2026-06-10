@@ -1,8 +1,14 @@
 package dev.jqb.onefeed.app.author;
 
+import dev.jqb.onefeed.api.author.AuthorNormalizer;
+import dev.jqb.onefeed.api.author.PlatformAuthor;
 import dev.jqb.onefeed.api.caching.Cacher;
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
+import dev.jqb.onefeed.api.content.ContentNormalizer;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.feed.Feed;
+import dev.jqb.onefeed.api.impl.OneFeedAuthor;
+import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.provider.Provider;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,27 +41,36 @@ public class AuthorService {
      * @param feeds the {@link Feed}s whose authors to retrieve
      * @return a stream of {@link Author}s as they arrive from their platforms' API
      */
-    public Flux<Author> getAuthors(List<Feed<?>> feeds) {
+    public Flux<OneFeedAuthor> getAuthors(
+        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds
+    ) {
         // Try to get the associated feeds, if the IDs are valid
-        List<Mono<? extends Author>> authorMonos = new ArrayList<>(feeds.size());
-        for (Feed<?> feed : feeds) {
-            Provider<?> provider = feed.getProvider();
-            Mono<? extends Author> authorMono = provider.fetchProfile(feed.getId().getFeedName());
-            authorMono.doOnError(err -> logger.warn(
-                    "Error fetching author from feed '{}': {}", feed.getId().getFeedName(),
-                    err.getStackTrace()))
-                .onErrorComplete();
-            authorMonos.add(authorMono);
+        List<Mono<? extends OneFeedAuthor>> normalizedAuthorMonos = new ArrayList<>(feeds.size());
+
+        for (Feed<? extends PlatformContent, ? extends PlatformAuthor> feed : feeds) {
+            Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = feed.getProvider();
+            Mono<? extends PlatformAuthor> authorMono = provider.fetchAuthor(feed.getId().getFeedName());
+            AuthorNormalizer<PlatformAuthor, OneFeedAuthor> authorNormalizer =
+                (AuthorNormalizer<PlatformAuthor, OneFeedAuthor>) provider.getAuthorNormalizer();
+
+            normalizedAuthorMonos.add(
+                authorMono
+                    .map(authorNormalizer::normalize)
+                    .doOnError(err -> logger.warn(
+                        "Error fetching author from feed '{}': {}", feed.getId().getFeedName(),
+                        err.getStackTrace()))
+                    .onErrorComplete()
+            );
         }
 
-        return Flux.merge(authorMonos).doOnNext(this::cacheIfAble);
+        return Flux.merge(normalizedAuthorMonos).doOnNext(this::cacheIfAble);
     }
 
     /**
      * Caches the given author if the cache is set.
      * @param author the {@link Author} to cache if the cache is set
      */
-    private void cacheIfAble(Author author) {
+    private void cacheIfAble(OneFeedAuthor author) {
         if (cache != null) {
             cache.cacheContent(List.of(author));
         }

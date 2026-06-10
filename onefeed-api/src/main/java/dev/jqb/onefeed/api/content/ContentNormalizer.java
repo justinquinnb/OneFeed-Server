@@ -5,7 +5,7 @@ package dev.jqb.onefeed.api.content;
  * @param <In> the type of {@link PlatformContent} to normalize
  * @param <Out> the type of {@link NormalizedContent} to produce
  */
-public interface Normalizer<In extends PlatformContent, Out extends NormalizedContent> {
+public interface ContentNormalizer<In extends PlatformContent, Out extends NormalizedContent> {
 
     /**
      * Normalizes the given {@link In}.

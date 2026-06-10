@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.app.model;
 
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
 import lombok.Getter;
 import lombok.Setter;
 

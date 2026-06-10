@@ -1,7 +1,7 @@
 package dev.jqb.onefeed.api.aggregation;
 
 import dev.jqb.onefeed.api.content.NormalizedContent;
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import java.util.ArrayList;
 import java.util.List;
