@@ -12,13 +12,13 @@ import lombok.Setter;
     property = "type"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ContentUpdate.class, name = "CONTENT"),
-    @JsonSubTypes.Type(value = AuthorUpdate.class, name = "AUTHOR"),
-    @JsonSubTypes.Type(value = CursorUpdate.class, name = "CURSOR")
+    @JsonSubTypes.Type(value = StreamedContent.class, name = "CONTENT"),
+    @JsonSubTypes.Type(value = StreamedAuthor.class, name = "AUTHOR"),
+    @JsonSubTypes.Type(value = StreamedCursor.class, name = "CURSOR")
 })
 @Getter
 @Setter
-public sealed class StreamData permits AuthorUpdate, ContentUpdate, CursorUpdate {
+public sealed class StreamData permits StreamedAuthor, StreamedContent, StreamedCursor {
 
     /**
      * The time the data was sent to the client

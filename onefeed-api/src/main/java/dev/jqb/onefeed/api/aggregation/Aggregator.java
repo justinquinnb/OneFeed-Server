@@ -1,11 +1,12 @@
 package dev.jqb.onefeed.api.aggregation;
 
+import dev.jqb.onefeed.api.author.PlatformAuthor;
 import dev.jqb.onefeed.api.content.NormalizedContent;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.content.PlatformCursor;
-import dev.jqb.onefeed.api.content.RawContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.provider.Provider;
 import java.util.List;
 import java.util.Map;
 import reactor.core.publisher.Flux;
@@ -25,8 +26,11 @@ public interface Aggregator<Out extends NormalizedContent> {
      *
      * @return a list of all content that was retrieved, not necessarily in order
      */
-    Flux<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
-        AggregationOptions options);
+    Flux<Out> aggregate(
+        int amount,
+        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds,
+        AggregationOptions options
+    );
 
     /**
      * Attempts to aggregate the given {@code amount} of content from the given {@code sources} with
@@ -39,6 +43,10 @@ public interface Aggregator<Out extends NormalizedContent> {
      *
      * @return a list of all content that was retrieved, not necessarily in order
      */
-    Flux<Out> aggregate(int amount, List<Feed<? extends RawContent>> feeds,
-        Map<FeedIdentifier, ? extends PlatformCursor> cursors, AggregationOptions options);
+    Flux<Out> aggregate(
+        int amount,
+        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds,
+        Map<FeedIdentifier, ? extends PlatformCursor> cursors,
+        AggregationOptions options
+    );
 }

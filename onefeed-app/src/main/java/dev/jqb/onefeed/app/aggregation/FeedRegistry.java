@@ -1,9 +1,11 @@
 package dev.jqb.onefeed.app.aggregation;
 
-import dev.jqb.onefeed.api.content.RawContent;
+import dev.jqb.onefeed.api.author.PlatformAuthor;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import dev.jqb.onefeed.api.feed.Feed;
 import dev.jqb.onefeed.api.feed.FeedIdentifier;
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.feed.UnknownFeedIdException;
+import dev.jqb.onefeed.api.provider.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +21,10 @@ import org.springframework.stereotype.Component;
 public class FeedRegistry {
     private static final Logger logger = LoggerFactory.getLogger(FeedRegistry.class);
 
-    private final ConcurrentHashMap<String, Provider<?>> feedIdToProvider = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<
+        FeedIdentifier,
+        Provider<? extends PlatformContent, ? extends PlatformAuthor>
+        > feedIdToProvider = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, List<String>> pluginIdToFeedNames = new ConcurrentHashMap<>();
 
     /**
@@ -29,19 +34,21 @@ public class FeedRegistry {
      * @param provider the provider plugin instance
      * @param feedNames the names of the feeds that the plugin is responsible for
      */
-    public void registerFeedsFor(PluginWrapper wrapper, Provider<?> provider,
+    public void registerFeedsFor(
+        PluginWrapper wrapper,
+        Provider<? extends PlatformContent, ? extends PlatformAuthor> provider,
         List<String> feedNames
     ) {
         String pluginId = wrapper.getPluginId();
-        logger.debug("Associating feed names with provider instance \"{}\"...",
+        logger.debug("Associating feed names with provider instance '{}'...",
             pluginId);
 
         for (String feedName : feedNames) {
             FeedIdentifier id = new FeedIdentifier(pluginId, feedName);
-            feedIdToProvider.put(id.toIdString(), provider);
+            feedIdToProvider.put(id, provider);
             pluginIdToFeedNames.computeIfAbsent(pluginId, k -> new ArrayList<>())
                 .add(feedName);
-            logger.trace("Associated feed \"{}\"", feedName);
+            logger.trace("Associated feed '{}'", feedName);
         }
     }
 
@@ -51,13 +58,13 @@ public class FeedRegistry {
      */
     public void deregisterFeedsFor(PluginWrapper wrapper) {
         String pluginId = wrapper.getPluginId();
-        logger.debug("Unregistering feeds for plugin \"{}\"", pluginId);
+        logger.debug("Unregistering feeds for plugin '{}'", pluginId);
         List<String> feedNames = pluginIdToFeedNames.remove(pluginId);
         if (feedNames != null) {
             for (String feedName : feedNames) {
                 FeedIdentifier id = new FeedIdentifier(pluginId, feedName);
                 feedIdToProvider.remove(id);
-                logger.trace("Unregistered feed \"{}\"", feedName);
+                logger.trace("Unregistered feed '{}'", feedName);
             }
         }
     }
@@ -69,8 +76,10 @@ public class FeedRegistry {
      *
      * @see FeedIdentifier#toIdString()
      */
-    public Provider<?> getProvider(FeedIdentifier feedId) {
-        return feedIdToProvider.get(feedId.toIdString());
+    public Provider<? extends PlatformContent, ? extends PlatformAuthor> getProvider(
+        FeedIdentifier feedId
+    ) {
+        return feedIdToProvider.get(feedId);
     }
 
     /**
@@ -80,7 +89,14 @@ public class FeedRegistry {
      *
      * @see FeedIdentifier#toIdString()
      */
-    public Feed<? extends RawContent> getFeed(FeedIdentifier feedId) {
+    public Feed<? extends PlatformContent, ? extends PlatformAuthor> getFeed(
+        FeedIdentifier feedId
+    ) {
+        Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = getProvider(feedId);
+        if (provider == null) {
+            throw new UnknownFeedIdException(feedId);
+        }
+
         return new Feed<>(feedId, getProvider(feedId));
     }
 }

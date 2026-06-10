@@ -98,7 +98,7 @@ public class StartupRunner implements ApplicationRunner {
                 // Collect all the plugin's tasks
                 for (ScheduledTask task : pluginTasks) {
                     task.setRequester(pluginWrapper);
-                    logger.debug("Found task for \"{}\": {}", pluginWrapper.getPluginId(), task.getName());
+                    logger.debug("Found task for '{}': {}", pluginWrapper.getPluginId(), task.getName());
                     collectedTasks.add(task);
                 }
             }
@@ -134,7 +134,7 @@ public class StartupRunner implements ApplicationRunner {
                 continue;
             }
 
-            logger.debug("Scheduled task {} with trigger \"{}\"", task.getName(), humanTriggerName);
+            logger.debug("Scheduled task {} with trigger '{}'", task.getName(), humanTriggerName);
         }
     }
 }

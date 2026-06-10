@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.app.model;
 
-import dev.jqb.onefeed.api.feed.Author;
+import dev.jqb.onefeed.api.author.Author;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public final class AuthorUpdate extends StreamData {
+public final class StreamedAuthor extends StreamData {
 
     /**
      * The unique identifier of the feed the author has, well... authored
@@ -25,7 +25,7 @@ public final class AuthorUpdate extends StreamData {
      * Constructs a new {@code AuthorUpdate} for the given author.
      * @param author the author to be sent to the client
      */
-    public AuthorUpdate(Author author) {
+    public StreamedAuthor(Author author) {
         super();
         this.author = author;
     }

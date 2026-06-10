@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 @ToString
 @NoArgsConstructor
 public abstract sealed class Content implements FeedIdentifiable, Comparable<Content>
-    permits RawContent, NormalizedContent
+    permits PlatformContent, NormalizedContent
 {
 
     /**

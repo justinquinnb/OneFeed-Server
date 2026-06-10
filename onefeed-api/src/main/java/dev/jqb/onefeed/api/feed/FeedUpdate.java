@@ -1,7 +1,7 @@
 package dev.jqb.onefeed.api.feed;
 
-import dev.jqb.onefeed.api.content.RawContent;
-import dev.jqb.onefeed.api.impl.Profile;
+import dev.jqb.onefeed.api.author.PlatformAuthor;
+import dev.jqb.onefeed.api.content.PlatformContent;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,28 +13,28 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class FeedUpdate<T extends RawContent> {
+public class FeedUpdate<C extends PlatformContent, A extends PlatformAuthor> {
 
     /**
      * Any new content that was added to the feed
      */
     @Builder.Default
-    private List<T> newContent = List.of();
+    private List<C> newContent = List.of();
 
     /**
      * Any content that was updated in the feed
      */
     @Builder.Default
-    private List<T> updatedContent = List.of();
+    private List<C> updatedContent = List.of();
 
     /**
      * Any content that was removed from the feed
      */
     @Builder.Default
-    private List<T> removedContent = List.of();
+    private List<C> removedContent = List.of();
 
     /**
      * The updated profile of the feed's author
      */
-    private Profile updatedProfile;
+    private A updatedAuthor;
 }

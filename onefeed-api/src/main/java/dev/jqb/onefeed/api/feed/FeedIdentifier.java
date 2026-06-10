@@ -56,6 +56,12 @@ public class FeedIdentifier {
     @JsonCreator
     public static FeedIdentifier fromIdString(String idString) {
         String[] parts = idString.split(":");
+
+        if (parts.length != 2) {
+            String reason = String.format("Expected 2 ':'-separated parts. Found %d.", parts.length);
+            throw new MalformedFeedIdException(idString, reason);
+        }
+
         return new FeedIdentifier(parts[0], parts[1]);
     }
 }

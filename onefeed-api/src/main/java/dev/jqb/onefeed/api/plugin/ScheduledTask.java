@@ -36,7 +36,7 @@ public sealed abstract class ScheduledTask implements Runnable permits CronTask,
 
     @Override
     public void run() {
-        logger.debug("Running scheduled task from \"{}\": {}", requester.getPluginId(), name);
+        logger.debug("Running scheduled task from '{}': {}", requester.getPluginId(), name);
         task.run();
     }
 }

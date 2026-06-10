@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.api.content;
 
-import dev.jqb.onefeed.api.feed.Provider;
+import dev.jqb.onefeed.api.provider.Provider;
 import dev.jqb.onefeed.api.feed.SourceInfo;
 import java.time.Instant;
 import lombok.Getter;
@@ -14,10 +14,10 @@ import org.jspecify.annotations.Nullable;
 @NoArgsConstructor
 @Getter
 @Setter
-public abstract non-sealed class RawContent extends Content {
+public abstract non-sealed class PlatformContent extends Content {
 
     /**
-     * Constructs a piece of {@code RawContent} attributed to a {@code source} and created/published
+     * Constructs a piece of {@code PlatformContent} attributed to a {@code source} and created/published
      * at the given time.
      *
      * @param source the origin of the content
@@ -25,7 +25,7 @@ public abstract non-sealed class RawContent extends Content {
      *                       some equivalent means), if known, on the originating platform's API
      * @param published      the time the {@code Content} was published on its {@code source}
      */
-    public RawContent(SourceInfo source, @Nullable String nextPageCursor, Instant published) {
+    public PlatformContent(SourceInfo source, @Nullable String nextPageCursor, Instant published) {
         super(source, nextPageCursor, published);
     }
 }

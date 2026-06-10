@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.api.feed;
+package dev.jqb.onefeed.api.provider;
 
 import java.util.HashMap;
 import lombok.Getter;
