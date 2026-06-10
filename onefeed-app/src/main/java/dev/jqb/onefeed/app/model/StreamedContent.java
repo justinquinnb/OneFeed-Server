@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public final class ContentUpdate<T extends NormalizedContent> extends StreamData {
+public final class StreamedContent<T extends NormalizedContent> extends StreamData {
 
     /**
      * The new content
@@ -21,7 +21,7 @@ public final class ContentUpdate<T extends NormalizedContent> extends StreamData
      * Constructs a new {@code ContentUpdate} with the given {@code content}.
      * @param content the new content
      */
-    public ContentUpdate(T content) {
+    public StreamedContent(T content) {
         super();
         this.content = content;
     }

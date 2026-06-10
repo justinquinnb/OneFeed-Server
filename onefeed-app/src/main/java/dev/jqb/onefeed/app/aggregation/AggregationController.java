@@ -12,9 +12,9 @@ import dev.jqb.onefeed.api.feed.FeedIdentifier;
 import dev.jqb.onefeed.api.impl.OneFeedContent;
 import dev.jqb.onefeed.api.impl.OneFeedCursor;
 import dev.jqb.onefeed.api.impl.Profile;
-import dev.jqb.onefeed.app.model.AuthorUpdate;
-import dev.jqb.onefeed.app.model.ContentUpdate;
-import dev.jqb.onefeed.app.model.CursorUpdate;
+import dev.jqb.onefeed.app.model.StreamedAuthor;
+import dev.jqb.onefeed.app.model.StreamedContent;
+import dev.jqb.onefeed.app.model.StreamedCursor;
 import dev.jqb.onefeed.app.model.CustomAggregation;
 import dev.jqb.onefeed.app.model.CustomAggregation.WeightedFeed;
 import dev.jqb.onefeed.app.model.StreamData;
@@ -43,6 +43,9 @@ import reactor.core.publisher.Mono;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
+/**
+ * Endpoints to get aggregations of content from multiple feeds
+ */
 @RestController
 @Validated
 @RequestMapping("/aggregation")
@@ -118,26 +121,26 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         // Collect all the content for aggregate cursor generation
         List<OneFeedContent> allContent = new ArrayList<>();
 
-        Flux<ContentUpdate<OneFeedContent>> contentUpdateStream = contentStream
+        Flux<StreamedContent<OneFeedContent>> contentUpdateStream = contentStream
             .doOnNext(allContent::add)
-            .map(ContentUpdate::new);
+            .map(StreamedContent::new);
 
         // Optionally get the author stream
-        Flux<AuthorUpdate> authorUpdateStream;
+        Flux<StreamedAuthor> authorUpdateStream;
         if (includeAuthors) {
             List<Mono<Profile>> authorMonos = new ArrayList<>(feeds.size());
 
             for (Feed<? extends PlatformContent> feed : feeds) {
-                authorMonos.add(feed.getProvider().getProfile(feed.getId().getFeedName()));
+                authorMonos.add(feed.getProvider().fetchProfile(feed.getId().getFeedName()));
             }
 
-            authorUpdateStream = Flux.merge(authorMonos).map(AuthorUpdate::new);
+            authorUpdateStream = Flux.merge(authorMonos).map(StreamedAuthor::new);
         } else {
             authorUpdateStream = Flux.empty();
         }
 
         return Flux.merge(contentUpdateStream, authorUpdateStream).concatWith(
-            Mono.fromCallable(() -> new CursorUpdate(generateAggregateCursor(allContent)))
+            Mono.fromCallable(() -> new StreamedCursor(generateAggregateCursor(allContent)))
         );
     }
 
@@ -172,13 +175,13 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         // Organize the data
         for (StreamData streamDataObj : streamData) {
             switch (streamDataObj) {
-                case ContentUpdate<?> cu:
+                case StreamedContent<?> cu:
                     content.add(cu.getContent());
                     break;
-                case AuthorUpdate au:
+                case StreamedAuthor au:
                     authors.put(au.getAuthor().getFeedIdentifier(), au.getAuthor());
                     break;
-                case CursorUpdate cu:
+                case StreamedCursor cu:
                     aggregateCursorStr = cu.getAggregateCursor();
                     break;
                 default:

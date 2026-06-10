@@ -61,5 +61,5 @@ public interface Provider<Out extends PlatformContent> {
      * @param feedName the name of the feed whose profile to retrieve
      * @return the profile for the given feed
      */
-    Mono<Profile> getProfile(String feedName);
+    Mono<Profile> fetchProfile(String feedName);
 }

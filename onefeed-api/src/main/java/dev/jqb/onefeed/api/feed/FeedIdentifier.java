@@ -58,7 +58,7 @@ public class FeedIdentifier {
         String[] parts = idString.split(":");
 
         if (parts.length != 2) {
-            String reason = String.format("Expected 2 ':'-separated parts. Found %d", parts.length);
+            String reason = String.format("Expected 2 ':'-separated parts. Found %d.", parts.length);
             throw new MalformedFeedIdException(idString, reason);
         }
 

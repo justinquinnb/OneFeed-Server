@@ -8,7 +8,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public final class CursorUpdate extends StreamData {
+public final class StreamedCursor extends StreamData {
 
     /**
      * The new aggregate cursor
@@ -19,7 +19,7 @@ public final class CursorUpdate extends StreamData {
      * Constructs a new {@code CursorUpdate} with the given aggregate cursor.
      * @param aggregateCursor the new aggregate cursor
      */
-    public CursorUpdate(String aggregateCursor) {
+    public StreamedCursor(String aggregateCursor) {
         super();
         this.aggregateCursor = aggregateCursor;
     }

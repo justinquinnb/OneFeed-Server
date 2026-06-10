@@ -4,6 +4,7 @@ import dev.jqb.onefeed.api.caching.OneFeedCacherPlugin;
 import dev.jqb.onefeed.api.provider.OneFeedProviderPlugin;
 import dev.jqb.onefeed.app.aggregation.AggregationService;
 import dev.jqb.onefeed.app.aggregation.FeedRegistry;
+import dev.jqb.onefeed.app.author.AuthorService;
 import dev.jqb.onefeed.app.tasks.TaskRegistry;
 import org.pf4j.PluginState;
 import org.pf4j.PluginStateEvent;
@@ -21,15 +22,18 @@ public class OneFeedPluginStateListener implements PluginStateListener {
     private final FeedRegistry feedRegistry;
     private final TaskRegistry taskRegistry;
     private final AggregationService aggregationService;
+    private final AuthorService authorService;
 
     @Autowired
     public OneFeedPluginStateListener(PluginTypeRegistry typeRegistry, FeedRegistry feedRegistry,
-        TaskRegistry taskRegistry, AggregationService aggregationService
+        TaskRegistry taskRegistry, AggregationService aggregationService,
+        AuthorService authorService
     ) {
         this.typeRegistry = typeRegistry;
         this.feedRegistry = feedRegistry;
         this.taskRegistry = taskRegistry;
         this.aggregationService = aggregationService;
+        this.authorService = authorService;
     }
 
     @Override
@@ -51,6 +55,7 @@ public class OneFeedPluginStateListener implements PluginStateListener {
 
                 OneFeedCacherPlugin plugin = (OneFeedCacherPlugin) wrapper.getPlugin();
                 aggregationService.setCache(plugin.getCacher());
+                authorService.setCache(plugin.getCacher());
             }
         } else if (state == PluginState.STOPPED || state == PluginState.DISABLED ||
             state == PluginState.UNLOADED
@@ -63,6 +68,7 @@ public class OneFeedPluginStateListener implements PluginStateListener {
                 feedRegistry.deregisterFeedsFor(wrapper);
             } else if (OneFeedCacherPlugin.class.isAssignableFrom(pluginClass)) {
                 aggregationService.setCache(null);
+                authorService.setCache(null);
             }
         }
     }
