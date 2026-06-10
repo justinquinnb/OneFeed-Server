@@ -1,5 +1,6 @@
 package dev.jqb.onefeed.app.model;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -21,7 +22,7 @@ import lombok.ToString;
 @FeedWeightConstraint
 public class CustomAggregation {
     @Size(min=1, message="At least one feed must be specified")
-    private List<WeightedFeed> weightedFeeds;
+    private List<@Valid WeightedFeed> weightedFeeds;
 
     @Getter
     @Setter
@@ -38,7 +39,7 @@ public class CustomAggregation {
         /**
          * An optional weight for the feed
          */
-        @Min(1)
+        @Min(value=1, message="Weight must be at least 1")
         private Integer weight = 1;
 
         /**
