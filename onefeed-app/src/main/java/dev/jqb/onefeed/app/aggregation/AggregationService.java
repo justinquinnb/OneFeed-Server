@@ -65,10 +65,8 @@ public class AggregationService implements Aggregator<OneFeedContent> {
             );
         }
 
-        Flux<OneFeedContent> mergedFlux = Flux.merge(normalizedContentStreams);
-        mergedFlux.doOnNext(this::cacheIfAble);
-
-        return mergedFlux;
+        return Flux.merge(normalizedContentStreams)
+            .doOnNext(this::cacheIfAble);
     }
 
     @Override
@@ -101,10 +99,8 @@ public class AggregationService implements Aggregator<OneFeedContent> {
             );
         }
 
-        Flux<OneFeedContent> mergedFlux = Flux.merge(normalizedContentStreams);
-        mergedFlux.doOnNext(this::cacheIfAble);
-
-        return mergedFlux;
+        return Flux.merge(normalizedContentStreams)
+            .doOnNext(this::cacheIfAble);
     }
 
     /**
