@@ -54,7 +54,6 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>3.8.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -74,4 +73,16 @@
             <artifactId>pf4j</artifactId>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.jqb</groupId>
+                <artifactId>onefeed-bom</artifactId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

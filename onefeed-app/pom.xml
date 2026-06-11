@@ -134,6 +134,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>dev.jqb</groupId>
+                <artifactId>onefeed-bom</artifactId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
