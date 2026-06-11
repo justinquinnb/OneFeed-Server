@@ -1,1 +1,1 @@
-mvn clean install -pl :onefeed-api,:onefeed-bom,:onefeed-plugin-test-kit -am
+mvn clean install -pl :onefeed-core,:onefeed-bom,:onefeed-plugin-test-kit -am

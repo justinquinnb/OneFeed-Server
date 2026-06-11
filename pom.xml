@@ -17,22 +17,9 @@
     <java.version>25</java.version>
   </properties>
 
-  <licenses>
-    <license/>
-  </licenses>
-  <developers>
-    <developer/>
-  </developers>
-  <scm>
-    <connection/>
-    <developerConnection/>
-    <tag/>
-    <url/>
-  </scm>
-
   <modules>
-    <module>onefeed-app</module>
-    <module>onefeed-api</module>
+    <module>onefeed-server</module>
+    <module>onefeed-core</module>
     <module>onefeed-plugin-test-kit</module>
     <module>onefeed-bom</module>
   </modules>

@@ -1,0 +1,24 @@
+package dev.jqb.onefeed.server.model;
+
+import dev.jqb.onefeed.server.model.CustomAggregation.WeightedFeed;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+/**
+ * Validates that either all weights are null or none are null
+ */
+public class FeedWeightValidator implements ConstraintValidator<FeedWeightConstraint, CustomAggregation> {
+
+    @Override
+    public boolean isValid(CustomAggregation value, ConstraintValidatorContext context) {
+        int numWeights = 0;
+
+        for (WeightedFeed fw : value.getWeightedFeeds()) {
+            if (fw.getWeight() != null) {
+                numWeights++;
+            }
+        }
+
+        return numWeights == 0 || numWeights == value.getWeightedFeeds().size();
+    }
+}
