@@ -33,9 +33,7 @@ build/
 .vscode/
 
 # OneFeed Specific Stuff
-onefeed-app/plugins/
-plugin-env.yaml
-plugin-config.yaml
 .env
 .flattened-pom.xml
-onefeed-app/plugin-config.yaml
+plugins/
+plugin-config.yaml
