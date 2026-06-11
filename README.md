@@ -5,35 +5,35 @@ At its core, OneFeed is an abstraction to the mess that is social media feed API
 abstraction, it offers multi-platform feed aggregation and API request reduction via caching. The 
 project accomplishes this with two key components:
 
-1. **The OneFeed API**, which provides a unified interface for retrieving data from social media APIs; and
-2. **The OneFeed App**, which uses that, Spring Boot, and a plugin architecture so devs can painlessly configure, serve, and consume their data.
+1. **OneFeed Core (API)**, which provides a unified interface for retrieving data from social media APIs; and
+2. **OneFeed Server**, which uses that, Spring Boot, and a plugin architecture so devs can painlessly configure, serve, and consume their data.
 
-### The API
+### OneFeed Core
 #### Highlights
 1. Unified interface for retrieving social media feed data with ease
 2. Mandated support for default content and author implementations by providers to remove the need for DTO handling
 3. Preservation of provider-specific DTOs to support mapping data to custom content and author schemas
-4. Zero coupling to the OneFeed App, so you're free to use the API however and wherever you please
+4. Zero coupling to the OneFeed Server, so you're free to use the API however and wherever you please
 
 #### Concept & Goals
-The OneFeed API abstracts complex, platform-specific content and author retrieval APIs so you can 
+The OneFeed Core API abstracts complex, platform-specific content and author retrieval APIs so you can 
 focus on consuming the data, not retrieving it. These methods are simple, reactive, versatile, and 
 intuitive. A quick call to `fetchContent(amount, feeds, options, <cursor>)` is the primary 
 touchpoint. It outputs a `Flux` of content in the provider's platform's DTO and supports pagination
 however the platform handles it (or doesn't).
 
-All `Provider`s (implementations of a social media's content and author APIs in conformance to the 
-OneFeed API) are required to provide a `Normalizer` converting the DTOs they output into the 
+All `Provider`s (implementations of a social media's content and author APIs in conformance to 
+OneFeed Core API) are required to provide a `Normalizer` converting the DTOs they output into the 
 default `Content` and `Author` implementations the OneFeed API provides.
 
 If you don't want to use the default `Content` and `Author` implementations, you can take the DTOs
 as-is and/or map them to a normalized schema of your choice.
 
-Although the OneFeed App heavily relies on the OneFeed API to support its functionalities, the 
-OneFeed API is completely independent. So long as your implementations conform to the API, they will 
+Although the OneFeed Server heavily relies on OneFeed Core to support its functionalities, OneFeed 
+Core is completely independent. So long as your implementations conform to its API, they will 
 work for anyone, anywhere, in any context.
 
-### The App
+### OneFeed Server
 #### Highlights
 1. REST API exposing content from any of your configured feeds in a single shape with a single call
 2. Hot-swappable plugin support to reduce downtime and promote implementation reuse
@@ -42,13 +42,13 @@ work for anyone, anywhere, in any context.
 5. Default content and author implementations out-of-the-box, supported by all plugins, with DTOs accessible for caching and serving custom normalizations 
 
 #### Concept & Goals
-The OneFeed App, a Spring Boot service, offers a REST API for your clients to fetch an aggregation 
+The OneFeed Server, a Spring Boot service, offers a REST API for your clients to fetch an aggregation 
 of (theoretically) any social media feed's content and receive normalized, ready-to-display data 
 in the shape of your choosing without the headache of juggling platform-specific DTOs and content 
 retrieval procedures.
 
 Developers can install plugins from others who've already published their implementations of 
-social media APIs in accordance to the OneFeed API. These plugins can be loaded and unloaded at 
+social media APIs in accordance to the OneFeed Core API. These plugins can be loaded and unloaded at 
 runtime.
 
 Similarly, developers can install plugins providing caching services from their favorite database 
@@ -73,17 +73,17 @@ This project is currently in early-mid development and thus unstable. At the mom
 the following core features:
 - Hot-swappable content provider and cache (database) service plugins
   - Developing Instagram and Facebook Provider Plugins alongside the API and app in this repository
-    - Helps validate provider plugin loading and unloading on the app side and the interface design of the OneFeed API
+    - Helps validate provider plugin loading and unloading on the app side and the interface design of the OneFeed Core API
     - Provides a live source of data to pull from when testing aggregation endpoints in the app
   - Soon, a Firebase or MongoDB (TBD) "Cacher" (database-based cache) plugin
-    - Helps validate cache plugin loading and unloading on the app side and the interface design of the OneFeed API
+    - Helps validate cache plugin loading and unloading on the app side and the interface design of the OneFeed Core API
     - Provides a live cache to pull from when testing aggregation endpoints
-- OneFeed App aggregation endpoints
+- OneFeed Server aggregation endpoints
   - Developing basic aggregation endpoints to test the functionality of the system end to end
 - Extensibility of Content and Author data types
   - Providing native support for custom Content and Author definitions (rather than just extending an existing schema)
 - Painless client-side API implementation
-  - Preconfigured aggregations to be referenced by ID with a single, clean OneFeed API hit
+  - Preconfigured aggregations to be referenced by ID with a single, clean OneFeed Server API hit
   - Choice between minimizing time till first content/author load via stream (reactor-based) endpoints or super speedy implementation with complete response generate
 
 # Use
