@@ -12,6 +12,12 @@
   <url>https://github.com/justinquinnb/OneFeed</url>
   <packaging>pom</packaging>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.0.5</version>
+  </parent>
+
   <properties>
     <revision>0.0.2-SNAPSHOT</revision>
     <java.version>25</java.version>
@@ -87,10 +93,6 @@
 
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
