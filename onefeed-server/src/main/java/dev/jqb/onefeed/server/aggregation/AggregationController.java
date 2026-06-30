@@ -1,12 +1,9 @@
 package dev.jqb.onefeed.server.aggregation;
 
 import dev.jqb.onefeed.core.aggregation.AggregateCursorGenerator;
-import dev.jqb.onefeed.core.aggregation.Aggregation;
+import dev.jqb.onefeed.core.aggregation.AggregationResponse;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
-import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.content.Content;
-import dev.jqb.onefeed.core.content.NormalizedContent;
-import dev.jqb.onefeed.core.content.PlatformContent;
 import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedId;
@@ -154,7 +151,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
      * feeds
      */
     @PostMapping("/batch/custom")
-    public Aggregation getCustomAggregationBatch(
+    public AggregationResponse getCustomAggregationBatch(
         @RequestParam @Min(1) int amount,
         @RequestBody @Valid CustomAggregation customAggregation,
         @RequestParam(defaultValue = "true") Boolean includeAuthors,
@@ -186,7 +183,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         }
 
         // Build the aggregation object
-        return new Aggregation(authors, content, aggregateCursorStr);
+        return new AggregationResponse(authors, content, aggregateCursorStr);
     }
 
     /**

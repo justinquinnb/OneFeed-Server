@@ -1,10 +1,7 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.actor.ActorNormalizer;
-import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.caching.Cacher;
 import dev.jqb.onefeed.core.actor.Actor;
-import dev.jqb.onefeed.core.content.PlatformContent;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.actor.OneFeedActor;
 import dev.jqb.onefeed.core.provider.Provider;

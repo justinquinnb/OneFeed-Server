@@ -1,7 +1,5 @@
 package dev.jqb.onefeed.server.aggregation;
 
-import dev.jqb.onefeed.core.actor.PlatformActor;
-import dev.jqb.onefeed.core.content.PlatformContent;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.feed.UnknownFeedIdException;

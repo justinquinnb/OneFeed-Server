@@ -1,6 +1,5 @@
 package dev.jqb.onefeed.server.model;
 
-import dev.jqb.onefeed.core.content.NormalizedContent;
 import lombok.Getter;
 import lombok.Setter;
 
