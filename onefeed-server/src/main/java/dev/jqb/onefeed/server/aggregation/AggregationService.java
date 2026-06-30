@@ -2,15 +2,15 @@ package dev.jqb.onefeed.server.aggregation;
 
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
 import dev.jqb.onefeed.core.aggregation.Aggregator;
-import dev.jqb.onefeed.core.author.PlatformAuthor;
+import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.caching.Cacher;
 import dev.jqb.onefeed.core.content.ContentNormalizer;
 import dev.jqb.onefeed.core.content.PlatformContent;
-import dev.jqb.onefeed.core.content.PlatformCursor;
+import dev.jqb.onefeed.core.feed.PlatformCursor;
 import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.feed.FeedIdentifier;
+import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.provider.Provider;
-import dev.jqb.onefeed.core.impl.OneFeedContent;
+import dev.jqb.onefeed.core.content.OneFeedContent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +40,14 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     @Override
     public Flux<OneFeedContent> aggregate(
         int amount,
-        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds,
+        List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds,
         AggregationOptions options
     ) {
-        Map<FeedIdentifier, Integer> targetAmounts = options.getTargetAmounts(amount);
+        Map<FeedId, Integer> targetAmounts = options.getTargetAmounts(amount);
         List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
 
-        for (Feed<? extends PlatformContent, ? extends PlatformAuthor> feed : feeds) {
-            Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = feed.getProvider();
+        for (Feed<? extends PlatformContent, ? extends PlatformActor> feed : feeds) {
+            Provider<? extends PlatformContent, ? extends PlatformActor> provider = feed.getProvider();
             ContentNormalizer<PlatformContent, OneFeedContent> contentNormalizer =
                 (ContentNormalizer<PlatformContent, OneFeedContent>) provider.getContentNormalizer();
             String feedName = feed.getId().getFeedName();
@@ -72,15 +72,15 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     @Override
     public Flux<OneFeedContent> aggregate(
         int amount,
-        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds,
-        Map<FeedIdentifier, ? extends PlatformCursor> cursors,
+        List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds,
+        Map<FeedId, ? extends PlatformCursor> cursors,
         AggregationOptions options
     ) {
-        Map<FeedIdentifier, Integer> targetAmounts = options.getTargetAmounts(amount);
+        Map<FeedId, Integer> targetAmounts = options.getTargetAmounts(amount);
         List<Flux<OneFeedContent>> normalizedContentStreams = new ArrayList<>(feeds.size());
 
-        for (Feed<? extends PlatformContent, ? extends PlatformAuthor> feed : feeds) {
-            Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = feed.getProvider();
+        for (Feed<? extends PlatformContent, ? extends PlatformActor> feed : feeds) {
+            Provider<? extends PlatformContent, ? extends PlatformActor> provider = feed.getProvider();
             ContentNormalizer<PlatformContent, OneFeedContent> contentNormalizer =
                 (ContentNormalizer<PlatformContent, OneFeedContent>) provider.getContentNormalizer();
             String feedName = feed.getId().getFeedName();

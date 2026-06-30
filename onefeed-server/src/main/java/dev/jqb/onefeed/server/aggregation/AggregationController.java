@@ -3,15 +3,15 @@ package dev.jqb.onefeed.server.aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregateCursorGenerator;
 import dev.jqb.onefeed.core.aggregation.Aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
-import dev.jqb.onefeed.core.author.PlatformAuthor;
+import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.core.content.NormalizedContent;
 import dev.jqb.onefeed.core.content.PlatformContent;
-import dev.jqb.onefeed.core.author.Author;
+import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.feed.FeedIdentifier;
-import dev.jqb.onefeed.core.impl.OneFeedContent;
-import dev.jqb.onefeed.core.impl.OneFeedCursor;
+import dev.jqb.onefeed.core.feed.FeedId;
+import dev.jqb.onefeed.core.content.OneFeedContent;
+import dev.jqb.onefeed.core.aggregation.OneFeedCursor;
 import dev.jqb.onefeed.server.author.AuthorService;
 import dev.jqb.onefeed.server.model.StreamedAuthor;
 import dev.jqb.onefeed.server.model.StreamedContent;
@@ -87,25 +87,25 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         @RequestParam(required = false) String aggregateCursor
     ) {
         // Get the feed IDs first
-        List<FeedIdentifier> ids = customAggregation.getWeightedFeeds().stream().map(wf ->
-            FeedIdentifier.fromIdString(wf.getFeedId())).toList();
+        List<FeedId> ids = customAggregation.getWeightedFeeds().stream().map(wf ->
+            FeedId.fromIdString(wf.getFeedId())).toList();
 
         // Try to get the associated feeds, if the IDs are valid
-        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds =
+        List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds =
             new ArrayList<>(ids.size());
-        for (FeedIdentifier id : ids) {
-            Feed<? extends PlatformContent, ? extends PlatformAuthor> feed =
+        for (FeedId id : ids) {
+            Feed<? extends PlatformContent, ? extends PlatformActor> feed =
                 feedRegistry.getFeed(id);
             feeds.add(feed);
         }
 
         // Convert the weights to the map required by the aggregator
-        HashMap<FeedIdentifier, Integer> weights = new HashMap<>();
+        HashMap<FeedId, Integer> weights = new HashMap<>();
         for (WeightedFeed fw : customAggregation.getWeightedFeeds()) {
             if (fw.getWeight() == null) {
-                weights.put(FeedIdentifier.fromIdString(fw.getFeedId()), 1);
+                weights.put(FeedId.fromIdString(fw.getFeedId()), 1);
             } else {
-                weights.put(FeedIdentifier.fromIdString(fw.getFeedId()), fw.getWeight());
+                weights.put(FeedId.fromIdString(fw.getFeedId()), fw.getWeight());
             }
         }
 
@@ -114,7 +114,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         Flux<OneFeedContent> contentStream;
 
         if (aggregateCursor != null && !aggregateCursor.isBlank()) {
-            Map<FeedIdentifier, OneFeedCursor> cursors = decodeAggregateCursor(aggregateCursor);
+            Map<FeedId, OneFeedCursor> cursors = decodeAggregateCursor(aggregateCursor);
             contentStream = aggregationService.aggregate(amount, feeds, cursors, aggOptions);
         } else {
             contentStream = aggregationService.aggregate(amount, feeds, aggOptions);
@@ -165,7 +165,7 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         List<StreamData> streamData = stream.collectList().block();
 
         List<NormalizedContent> content = new ArrayList<>();
-        Map<FeedIdentifier, Author> authors = new HashMap<>();
+        Map<FeedId, Actor> authors = new HashMap<>();
         String aggregateCursorStr = null;
 
         // Organize the data
@@ -233,8 +233,8 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
         List<OneFeedContent> sortedContent = new ArrayList<>(content);
         sortedContent.sort(Content::compareTo);
 
-        HashMap<FeedIdentifier, OneFeedCursor> oldestFeedCursors = new HashMap<>();
-        HashMap<FeedIdentifier, OneFeedCursor> cursors = new HashMap<>();
+        HashMap<FeedId, OneFeedCursor> oldestFeedCursors = new HashMap<>();
+        HashMap<FeedId, OneFeedCursor> cursors = new HashMap<>();
 
         // Because the content is in descending timestamp order, the last piece of content with a
         // cursor for a feed is easy to get with this
@@ -269,11 +269,11 @@ public class AggregationController implements AggregateCursorGenerator<OneFeedCo
     }
 
     @Override
-    public Map<FeedIdentifier, OneFeedCursor> decodeAggregateCursor(String aggregateCursor) {
+    public Map<FeedId, OneFeedCursor> decodeAggregateCursor(String aggregateCursor) {
         try {
             String decoded = new String(Base64.getDecoder().decode(aggregateCursor));
             return jsonMapper.readValue(decoded,
-                new TypeReference<Map<FeedIdentifier, OneFeedCursor>>() {});
+                new TypeReference<Map<FeedId, OneFeedCursor>>() {});
         } catch (Exception e) {
             throw new MalformedAggregateCursorException();
         }

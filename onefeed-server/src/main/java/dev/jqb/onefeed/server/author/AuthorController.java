@@ -1,9 +1,9 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.author.NormalizedAuthor;
-import dev.jqb.onefeed.core.author.PlatformAuthor;
+import dev.jqb.onefeed.core.actor.NormalizedActor;
+import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.feed.FeedIdentifier;
+import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.server.aggregation.FeedRegistry;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
@@ -45,15 +45,15 @@ public class AuthorController {
      * API
      */
     @GetMapping("/stream")
-    public Flux<? extends NormalizedAuthor> getAuthorStream(
+    public Flux<? extends NormalizedActor> getAuthorStream(
         @RequestParam @Size(min = 1) List<String> feedIds
     ) {
-        List<FeedIdentifier> parsedFeedIds = feedIds.stream().map(FeedIdentifier::fromIdString)
+        List<FeedId> parsedFeedIds = feedIds.stream().map(FeedId::fromIdString)
             .toList();
 
-        List<Feed<?, ? extends PlatformAuthor>> feeds = new ArrayList<>(parsedFeedIds.size());
-        for (FeedIdentifier id : parsedFeedIds) {
-            Feed<?, ? extends PlatformAuthor> feed = feedRegistry.getFeed(id);
+        List<Feed<?, ? extends PlatformActor>> feeds = new ArrayList<>(parsedFeedIds.size());
+        for (FeedId id : parsedFeedIds) {
+            Feed<?, ? extends PlatformActor> feed = feedRegistry.getFeed(id);
             feeds.add(feed);
         }
 
@@ -68,7 +68,7 @@ public class AuthorController {
      * API
      */
     @GetMapping("/batch")
-    public List<? extends NormalizedAuthor> getAuthorBatch(
+    public List<? extends NormalizedActor> getAuthorBatch(
         @RequestParam @Size(min = 1) List<String> feedIds
     ) {
         return getAuthorStream(feedIds).collectList().block();

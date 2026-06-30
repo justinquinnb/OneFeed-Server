@@ -1,9 +1,9 @@
 package dev.jqb.onefeed.server.aggregation;
 
-import dev.jqb.onefeed.core.author.PlatformAuthor;
+import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.content.PlatformContent;
 import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.feed.FeedIdentifier;
+import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.feed.UnknownFeedIdException;
 import dev.jqb.onefeed.core.provider.Provider;
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public class FeedRegistry {
     private static final Logger logger = LoggerFactory.getLogger(FeedRegistry.class);
 
     private final ConcurrentHashMap<
-        FeedIdentifier,
-        Provider<? extends PlatformContent, ? extends PlatformAuthor>
+        FeedId,
+        Provider<? extends PlatformContent, ? extends PlatformActor>
         > feedIdToProvider = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, List<String>> pluginIdToFeedNames = new ConcurrentHashMap<>();
 
@@ -36,7 +36,7 @@ public class FeedRegistry {
      */
     public void registerFeedsFor(
         PluginWrapper wrapper,
-        Provider<? extends PlatformContent, ? extends PlatformAuthor> provider,
+        Provider<? extends PlatformContent, ? extends PlatformActor> provider,
         List<String> feedNames
     ) {
         String pluginId = wrapper.getPluginId();
@@ -44,7 +44,7 @@ public class FeedRegistry {
             pluginId);
 
         for (String feedName : feedNames) {
-            FeedIdentifier id = new FeedIdentifier(pluginId, feedName);
+            FeedId id = new FeedId(pluginId, feedName);
             feedIdToProvider.put(id, provider);
             pluginIdToFeedNames.computeIfAbsent(pluginId, k -> new ArrayList<>())
                 .add(feedName);
@@ -62,7 +62,7 @@ public class FeedRegistry {
         List<String> feedNames = pluginIdToFeedNames.remove(pluginId);
         if (feedNames != null) {
             for (String feedName : feedNames) {
-                FeedIdentifier id = new FeedIdentifier(pluginId, feedName);
+                FeedId id = new FeedId(pluginId, feedName);
                 feedIdToProvider.remove(id);
                 logger.trace("Unregistered feed '{}'", feedName);
             }
@@ -74,10 +74,10 @@ public class FeedRegistry {
      * @param feedId the ID of the feed whose provider to retrieve
      * @return the provider for the given feed ID or {@code null} if no such provider exists
      *
-     * @see FeedIdentifier#toIdString()
+     * @see FeedId#toIdString()
      */
-    public Provider<? extends PlatformContent, ? extends PlatformAuthor> getProvider(
-        FeedIdentifier feedId
+    public Provider<? extends PlatformContent, ? extends PlatformActor> getProvider(
+        FeedId feedId
     ) {
         return feedIdToProvider.get(feedId);
     }
@@ -87,12 +87,12 @@ public class FeedRegistry {
      * @param feedId the ID of the feed whose provider to retrieve
      * @return the feed for the given feed ID or {@code null} if no such feed exists
      *
-     * @see FeedIdentifier#toIdString()
+     * @see FeedId#toIdString()
      */
-    public Feed<? extends PlatformContent, ? extends PlatformAuthor> getFeed(
-        FeedIdentifier feedId
+    public Feed<? extends PlatformContent, ? extends PlatformActor> getFeed(
+        FeedId feedId
     ) {
-        Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = getProvider(feedId);
+        Provider<? extends PlatformContent, ? extends PlatformActor> provider = getProvider(feedId);
         if (provider == null) {
             throw new UnknownFeedIdException(feedId);
         }

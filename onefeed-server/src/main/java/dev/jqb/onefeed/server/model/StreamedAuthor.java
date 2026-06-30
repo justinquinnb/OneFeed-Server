@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.server.model;
 
-import dev.jqb.onefeed.core.author.Author;
+import dev.jqb.onefeed.core.actor.Actor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,13 +19,13 @@ public final class StreamedAuthor extends StreamData {
     /**
      * The author itself
      */
-    private Author author;
+    private Actor author;
 
     /**
      * Constructs a new {@code AuthorUpdate} for the given author.
      * @param author the author to be sent to the client
      */
-    public StreamedAuthor(Author author) {
+    public StreamedAuthor(Actor author) {
         super();
         this.author = author;
     }

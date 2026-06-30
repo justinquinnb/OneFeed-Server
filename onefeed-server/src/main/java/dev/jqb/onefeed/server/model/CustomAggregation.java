@@ -1,5 +1,6 @@
 package dev.jqb.onefeed.server.model;
 
+import dev.jqb.onefeed.core.feed.FeedId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +32,7 @@ public class CustomAggregation {
     @AllArgsConstructor
     public static class WeightedFeed {
         /**
-         * Corresponds to a {@link dev.jqb.onefeed.core.feed.FeedIdentifier}
+         * Corresponds to a {@link FeedId}
          */
         @NotBlank
         private String feedId;
@@ -45,7 +46,7 @@ public class CustomAggregation {
         /**
          * Constructs a new {@code WeightedFeed} with the given feed ID and no weight.
          * @param feedId the ID of the feed
-         * @see dev.jqb.onefeed.core.feed.FeedIdentifier#fromIdString(String)
+         * @see FeedId#fromIdString(String)
          */
         public WeightedFeed(String feedId) {
             this.feedId = feedId;

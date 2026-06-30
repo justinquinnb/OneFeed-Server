@@ -1,12 +1,12 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.author.AuthorNormalizer;
-import dev.jqb.onefeed.core.author.PlatformAuthor;
+import dev.jqb.onefeed.core.actor.ActorNormalizer;
+import dev.jqb.onefeed.core.actor.PlatformActor;
 import dev.jqb.onefeed.core.caching.Cacher;
-import dev.jqb.onefeed.core.author.Author;
+import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.content.PlatformContent;
 import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.impl.OneFeedAuthor;
+import dev.jqb.onefeed.core.actor.OneFeedActor;
 import dev.jqb.onefeed.core.provider.Provider;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,23 +37,23 @@ public class AuthorService {
     /**
      * Gets the authors of the given feeds.
      * @param feeds the {@link Feed}s whose authors to retrieve
-     * @return a stream of {@link Author}s as they arrive from their platforms' API
+     * @return a stream of {@link Actor}s as they arrive from their platforms' API
      */
-    public Flux<OneFeedAuthor> getAuthors(
-        List<Feed<? extends PlatformContent, ? extends PlatformAuthor>> feeds
+    public Flux<OneFeedActor> getAuthors(
+        List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds
     ) {
         // Try to get the associated feeds, if the IDs are valid
-        List<Mono<? extends OneFeedAuthor>> normalizedAuthorMonos = new ArrayList<>(feeds.size());
+        List<Mono<? extends OneFeedActor>> normalizedAuthorMonos = new ArrayList<>(feeds.size());
 
-        for (Feed<? extends PlatformContent, ? extends PlatformAuthor> feed : feeds) {
-            Provider<? extends PlatformContent, ? extends PlatformAuthor> provider = feed.getProvider();
-            Mono<? extends PlatformAuthor> authorMono = provider.fetchAuthor(feed.getId().getFeedName());
-            AuthorNormalizer<PlatformAuthor, OneFeedAuthor> authorNormalizer =
-                (AuthorNormalizer<PlatformAuthor, OneFeedAuthor>) provider.getAuthorNormalizer();
+        for (Feed<? extends PlatformContent, ? extends PlatformActor> feed : feeds) {
+            Provider<? extends PlatformContent, ? extends PlatformActor> provider = feed.getProvider();
+            Mono<? extends PlatformActor> authorMono = provider.fetchAuthor(feed.getId().getFeedName());
+            ActorNormalizer<PlatformActor, OneFeedActor> actorNormalizer =
+                (ActorNormalizer<PlatformActor, OneFeedActor>) provider.getAuthorNormalizer();
 
             normalizedAuthorMonos.add(
                 authorMono
-                    .map(authorNormalizer::normalize)
+                    .map(actorNormalizer::normalize)
                     .doOnError(err -> logger.warn(
                         "Error fetching author from feed '{}': {}", feed.getId().getFeedName(),
                         err.getStackTrace()))
@@ -66,9 +66,9 @@ public class AuthorService {
 
     /**
      * Caches the given author if the cache is set.
-     * @param author the {@link Author} to cache if the cache is set
+     * @param author the {@link Actor} to cache if the cache is set
      */
-    private void cacheIfAble(OneFeedAuthor author) {
+    private void cacheIfAble(OneFeedActor author) {
         if (cache != null) {
             cache.cacheContent(List.of(author));
         }
