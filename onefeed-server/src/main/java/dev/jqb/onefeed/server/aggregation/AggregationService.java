@@ -3,7 +3,7 @@ package dev.jqb.onefeed.server.aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
 import dev.jqb.onefeed.core.aggregation.Aggregator;
 import dev.jqb.onefeed.core.caching.Cacher;
-import dev.jqb.onefeed.core.feed.PlatformCursor;
+import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.provider.Provider;
@@ -70,7 +70,7 @@ public class AggregationService implements Aggregator<OneFeedContent> {
     public Flux<OneFeedContent> aggregate(
         int amount,
         List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds,
-        Map<FeedId, ? extends PlatformCursor> cursors,
+        Map<FeedId, ? extends FeedCursor> cursors,
         AggregationOptions options
     ) {
         Map<FeedId, Integer> targetAmounts = options.getTargetAmounts(amount);

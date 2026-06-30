@@ -1,6 +1,5 @@
 package dev.jqb.onefeed.server.aggregation;
 
-import dev.jqb.onefeed.core.aggregation.AggregateCursorGenerator;
 import dev.jqb.onefeed.core.aggregation.AggregationResponse;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
 import dev.jqb.onefeed.core.content.Content;
@@ -8,7 +7,6 @@ import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.content.OneFeedContent;
-import dev.jqb.onefeed.core.aggregation.OneFeedCursor;
 import dev.jqb.onefeed.server.author.AuthorService;
 import dev.jqb.onefeed.server.model.StreamedAuthor;
 import dev.jqb.onefeed.server.model.StreamedContent;
@@ -45,7 +43,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Validated
 @RequestMapping("/aggregation")
 @Tag(name = "Aggregation", description = "Endpoints for aggregating content from multiple feeds")
-public class AggregationController implements AggregateCursorGenerator<OneFeedContent> {
+public class AggregationController {
     private static final Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
     private final JsonMapper jsonMapper;
