@@ -1,74 +1,79 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.feed.Feed;
-import dev.jqb.onefeed.core.feed.FeedId;
-import dev.jqb.onefeed.server.aggregation.FeedRegistry;
+import dev.jqb.onefeed.core.actor.Actor;
+import dev.jqb.onefeed.core.actor.ActorKey;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
- * Endpoints to retrieve author data for feeds
+ * Endpoints to retrieve author data from platforms
  */
 @RestController
 @Validated
-@RequestMapping("/author")
-@Tag(name = "Author", description = "Endpoints for retrieving feeds' author data")
+@RequestMapping("/authors")
+@Tag(name = "Author", description = "Endpoints for retrieving author data")
 public class AuthorController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthorController.class);
-
     private final AuthorService authorService;
-    private final FeedRegistry feedRegistry;
 
     @Autowired
-    public AuthorController(AuthorService authorService, FeedRegistry feedRegistry) {
+    public AuthorController(AuthorService authorService) {
         this.authorService = authorService;
-        this.feedRegistry = feedRegistry;
     }
 
     /**
-     * Gets a stream of author data for the desired feeds.
-     * @param feedIds the IDs of the feeds whose authors to retrieve
-     * @return a stream of author data as each feed's object arrives from their platform's
-     * API
+     * Gets the requested author using its unique key.
+     * @param authorKey the ID of the author to retrieve
+     * @return the author data as it arrives from its platform's API
+     *
+     * @see ActorKey
+     */
+    @GetMapping("/{authorKey}")
+    public Mono<? extends Actor> getAuthor(@PathVariable String authorKey) {
+        return authorService.getAuthor(ActorKey.fromKeyString(authorKey));
+    }
+
+    /**
+     * Gets a stream of the desired authors.
+     * @param authorKeys the keys of the authors to retrieve
+     * @return a stream of author data as each object arrives from its platform's API
+     *
+     * @see ActorKey
      */
     @GetMapping("/stream")
-    public Flux<? extends NormalizedActor> getAuthorStream(
-        @RequestParam @Size(min = 1) List<String> feedIds
+    public Flux<? extends Actor> getAuthorsStream(
+        @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
-        List<FeedId> parsedFeedIds = feedIds.stream().map(FeedId::fromIdString)
-            .toList();
-
-        List<Feed<?, ? extends PlatformActor>> feeds = new ArrayList<>(parsedFeedIds.size());
-        for (FeedId id : parsedFeedIds) {
-            Feed<?, ? extends PlatformActor> feed = feedRegistry.getFeed(id);
-            feeds.add(feed);
-        }
-
-        return authorService.getAuthors(feeds);
+        return authorService.getAuthors(authorKeys.stream().map(ActorKey::fromKeyString).toList());
     }
 
     /**
-     * Gets a complete list of author data for the desired feeds.
-     * @param feedIds the IDs of the feeds whose authors to retrieve
-     * @return a complete list of author data as each feed's object arrives from their
-     * platform's
-     * API
+     * Gets a map of the desired authors' IDs to their data.
+     * @param authorKeys the keys of the authors to retrieve
+     * @return a map of the {@code authorKey}s to their respective {@code author}s
+     *
+     * @see ActorKey
      */
-    @GetMapping("/batch")
-    public List<? extends NormalizedActor> getAuthorBatch(
-        @RequestParam @Size(min = 1) List<String> feedIds
+    @GetMapping("/map")
+    public Map<ActorKey, Actor> getAuthorsMap(
+        @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
-        return getAuthorStream(feedIds).collectList().block();
+        List<? extends Actor> authors = getAuthorsStream(authorKeys).collectList().block();
+        Map<ActorKey, Actor> authorMap = new HashMap<>();
+        for (Actor author : authors) {
+            authorMap.put(author.getKey(), author);
+        }
+        return authorMap;
     }
 }

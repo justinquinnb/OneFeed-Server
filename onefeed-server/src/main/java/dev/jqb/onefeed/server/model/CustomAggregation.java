@@ -35,7 +35,7 @@ public class CustomAggregation {
          * Corresponds to a {@link FeedId}
          */
         @NotBlank
-        private String feedId;
+        private FeedId feedId;
 
         /**
          * An optional weight for the feed
@@ -46,9 +46,8 @@ public class CustomAggregation {
         /**
          * Constructs a new {@code WeightedFeed} with the given feed ID and no weight.
          * @param feedId the ID of the feed
-         * @see FeedId#fromIdString(String)
          */
-        public WeightedFeed(String feedId) {
+        public WeightedFeed(FeedId feedId) {
             this.feedId = feedId;
         }
     }

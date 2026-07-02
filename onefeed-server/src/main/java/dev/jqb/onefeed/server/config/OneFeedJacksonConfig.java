@@ -1,7 +1,7 @@
 package dev.jqb.onefeed.server.config;
 
-import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.core.actor.Actor;
+import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.server.plugin.PluginMixIn;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;

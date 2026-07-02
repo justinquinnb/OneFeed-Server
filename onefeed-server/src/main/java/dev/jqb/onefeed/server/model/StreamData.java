@@ -18,7 +18,9 @@ import lombok.Setter;
 })
 @Getter
 @Setter
-public sealed class StreamData permits StreamedAuthor, StreamedContent, StreamedCursor {
+public sealed class StreamData permits StreamedAuthor, StreamedContent, StreamedCursor,
+    StreamedPlatform
+{
 
     /**
      * The time the data was sent to the client

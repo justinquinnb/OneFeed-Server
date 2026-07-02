@@ -19,7 +19,7 @@
   </parent>
 
   <properties>
-    <revision>0.0.2-SNAPSHOT</revision>
+    <revision>0.0.3-SNAPSHOT</revision>
     <java.version>25</java.version>
   </properties>
 

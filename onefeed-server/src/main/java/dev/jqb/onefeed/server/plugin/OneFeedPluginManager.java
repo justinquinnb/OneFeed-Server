@@ -1,8 +1,8 @@
 package dev.jqb.onefeed.server.plugin;
 
 import dev.jqb.onefeed.core.caching.OneFeedCacherPlugin;
-import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
 import dev.jqb.onefeed.core.plugin.PluginConfigsFile;
+import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;

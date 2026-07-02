@@ -1,16 +1,22 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.caching.Cacher;
 import dev.jqb.onefeed.core.actor.Actor;
-import dev.jqb.onefeed.core.feed.Feed;
+import dev.jqb.onefeed.core.actor.ActorKey;
+import dev.jqb.onefeed.core.actor.ActorTransformer;
 import dev.jqb.onefeed.core.actor.OneFeedActor;
+import dev.jqb.onefeed.core.caching.Cacher;
+import dev.jqb.onefeed.core.content.Content;
+import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.provider.Provider;
+import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,36 +35,57 @@ public class AuthorService {
      */
     @Setter
     @Getter
-    private Cacher cache;
+    private Cacher<OneFeedContent, OneFeedActor> cache;
+
+    private ProviderRegistry providerRegistry;
+
+    @Autowired
+    public AuthorService(ProviderRegistry providerRegistry) {
+        this.providerRegistry = providerRegistry;
+    }
 
     /**
-     * Gets the authors of the given feeds.
-     * @param feeds the {@link Feed}s whose authors to retrieve
-     * @return a stream of {@link Actor}s as they arrive from their platforms' API
+     * Gets the desired author
+     * @param authorKey the key of the author to retrieve
+     * @return the desired author
      */
-    public Flux<OneFeedActor> getAuthors(
-        List<Feed<? extends PlatformContent, ? extends PlatformActor>> feeds
-    ) {
-        // Try to get the associated feeds, if the IDs are valid
-        List<Mono<? extends OneFeedActor>> normalizedAuthorMonos = new ArrayList<>(feeds.size());
-
-        for (Feed<? extends PlatformContent, ? extends PlatformActor> feed : feeds) {
-            Provider<? extends PlatformContent, ? extends PlatformActor> provider = feed.getProvider();
-            Mono<? extends PlatformActor> authorMono = provider.fetchAuthor(feed.getId().getFeedName());
-            ActorNormalizer<PlatformActor, OneFeedActor> actorNormalizer =
-                (ActorNormalizer<PlatformActor, OneFeedActor>) provider.getAuthorNormalizer();
-
-            normalizedAuthorMonos.add(
-                authorMono
-                    .map(actorNormalizer::normalize)
-                    .doOnError(err -> logger.warn(
-                        "Error fetching author from feed '{}': {}", feed.getId().getFeedName(),
-                        err.getStackTrace()))
-                    .onErrorComplete()
-            );
+    public Mono<OneFeedActor> getAuthor(ActorKey authorKey) {
+        Optional<OneFeedActor> cachedAuthor = fetchFromCacheIfAble(authorKey);
+        if (cachedAuthor.isPresent()) {
+            return Mono.just(cachedAuthor.get());
         }
 
-        return Flux.merge(normalizedAuthorMonos).doOnNext(this::cacheIfAble);
+        Optional<Provider<? extends Content, ? extends Actor>> possibleProvider =
+            providerRegistry.getProvider(authorKey);
+        if (possibleProvider.isEmpty()) {
+            logger.warn("No provider found for author {}", authorKey);
+            return Mono.empty();
+        }
+        Provider<? extends Content, ? extends Actor> provider = possibleProvider.get();
+        ActorTransformer<Actor, OneFeedActor> actorNormalizer =
+            (ActorTransformer<Actor, OneFeedActor>) provider.getActorNormalizer();
+
+        return provider
+            .fetchAuthor(authorKey.idOnPlatform())
+            .map(actorNormalizer::transform)
+            .doOnNext(this::cacheIfAble)
+            .doOnError(err -> logger.warn(
+                "Error fetching author '{}': {}", authorKey, err.getStackTrace()))
+            .onErrorComplete();
+    }
+
+    /**
+     * Gets the authors from the desired keys
+     * @param authorKeys the keys of the authors to retrieve
+     * @return a stream of {@link Actor}s as they arrive from their platforms' API
+     */
+    public Flux<OneFeedActor> getAuthors(List<ActorKey> authorKeys) {
+        List<Mono<OneFeedActor>> normalizedAuthorMonos = new ArrayList<>();
+        for (ActorKey authorKey : authorKeys) {
+            normalizedAuthorMonos.add(getAuthor(authorKey));
+        }
+
+        return Flux.merge(normalizedAuthorMonos);
     }
 
     /**
@@ -67,7 +94,20 @@ public class AuthorService {
      */
     private void cacheIfAble(OneFeedActor author) {
         if (cache != null) {
-            cache.cacheContent(List.of(author));
+            cache.cacheAuthor(author);
+        }
+    }
+
+    private Optional<OneFeedActor> fetchFromCacheIfAble(ActorKey authorKey) {
+        if (cache == null) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.ofNullable(cache.fetchAuthor(authorKey));
+        } catch (Exception e) {
+            logger.error("Error fetching author from cache", e);
+            return Optional.empty();
         }
     }
 }

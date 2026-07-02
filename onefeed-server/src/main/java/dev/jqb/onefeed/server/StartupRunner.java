@@ -1,9 +1,9 @@
 package dev.jqb.onefeed.server;
 
-import dev.jqb.onefeed.core.plugin.ScheduledTasks;
 import dev.jqb.onefeed.core.plugin.CronTask;
 import dev.jqb.onefeed.core.plugin.FixedDelayTask;
 import dev.jqb.onefeed.core.plugin.ScheduledTask;
+import dev.jqb.onefeed.core.plugin.ScheduledTasks;
 import dev.jqb.onefeed.server.plugin.OneFeedPluginManager;
 import java.time.Duration;
 import java.util.ArrayList;

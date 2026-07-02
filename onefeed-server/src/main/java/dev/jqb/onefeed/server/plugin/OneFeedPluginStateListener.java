@@ -1,10 +1,13 @@
 package dev.jqb.onefeed.server.plugin;
 
+import dev.jqb.onefeed.core.actor.OneFeedActor;
+import dev.jqb.onefeed.core.caching.Cacher;
 import dev.jqb.onefeed.core.caching.OneFeedCacherPlugin;
+import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
 import dev.jqb.onefeed.server.aggregation.AggregationService;
-import dev.jqb.onefeed.server.aggregation.FeedRegistry;
 import dev.jqb.onefeed.server.author.AuthorService;
+import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import dev.jqb.onefeed.server.tasks.TaskRegistry;
 import org.pf4j.PluginState;
 import org.pf4j.PluginStateEvent;
@@ -19,18 +22,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class OneFeedPluginStateListener implements PluginStateListener {
     private final PluginTypeRegistry typeRegistry;
-    private final FeedRegistry feedRegistry;
+    private final ProviderRegistry providerRegistry;
     private final TaskRegistry taskRegistry;
     private final AggregationService aggregationService;
     private final AuthorService authorService;
 
     @Autowired
-    public OneFeedPluginStateListener(PluginTypeRegistry typeRegistry, FeedRegistry feedRegistry,
-        TaskRegistry taskRegistry, AggregationService aggregationService,
-        AuthorService authorService
+    public OneFeedPluginStateListener(PluginTypeRegistry typeRegistry,
+        ProviderRegistry providerRegistry, TaskRegistry taskRegistry,
+        AggregationService aggregationService, AuthorService authorService
     ) {
         this.typeRegistry = typeRegistry;
-        this.feedRegistry = feedRegistry;
+        this.providerRegistry = providerRegistry;
         this.taskRegistry = taskRegistry;
         this.aggregationService = aggregationService;
         this.authorService = authorService;
@@ -47,15 +50,19 @@ public class OneFeedPluginStateListener implements PluginStateListener {
             Class<?> pluginClass = wrapper.getPlugin().getClass();
             if (OneFeedProviderPlugin.class.isAssignableFrom(pluginClass)) {
                 OneFeedProviderPlugin plugin = (OneFeedProviderPlugin) wrapper.getPlugin();
-                feedRegistry.registerFeedsFor(wrapper, plugin.getProvider(), plugin.getFeedNames());
+                providerRegistry.register(plugin.getProvider());
             } else if (OneFeedCacherPlugin.class.isAssignableFrom(pluginClass)) {
                 if (aggregationService.getCache() != null) {
                     throw new IllegalStateException("Cannot register multiple cachers");
                 }
 
                 OneFeedCacherPlugin plugin = (OneFeedCacherPlugin) wrapper.getPlugin();
-                aggregationService.setCache(plugin.getCacher());
-                authorService.setCache(plugin.getCacher());
+
+                // TODO improve below lines if possible
+                // Rn, this means things'll break if OFContent or OFActors aren't being used as the
+                // normalized class. If a fork-er uses a different type then problems will arise :/
+                aggregationService.setCache((Cacher<OneFeedContent, OneFeedActor>) plugin.getCacher());
+                authorService.setCache((Cacher<OneFeedContent, OneFeedActor>) plugin.getCacher());
             }
         } else if (state == PluginState.STOPPED || state == PluginState.DISABLED ||
             state == PluginState.UNLOADED
@@ -65,7 +72,7 @@ public class OneFeedPluginStateListener implements PluginStateListener {
 
             Class<?> pluginClass = wrapper.getPlugin().getClass();
             if (OneFeedProviderPlugin.class.isAssignableFrom(pluginClass)) {
-                feedRegistry.deregisterFeedsFor(wrapper);
+                providerRegistry.deregister(wrapper.getPluginId());
             } else if (OneFeedCacherPlugin.class.isAssignableFrom(pluginClass)) {
                 aggregationService.setCache(null);
                 authorService.setCache(null);

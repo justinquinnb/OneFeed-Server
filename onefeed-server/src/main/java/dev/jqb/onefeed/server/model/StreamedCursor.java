@@ -1,5 +1,6 @@
 package dev.jqb.onefeed.server.model;
 
+import dev.jqb.onefeed.core.feed.FeedCursor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,13 +14,13 @@ public final class StreamedCursor extends StreamData {
     /**
      * The new aggregate cursor
      */
-    private String aggregateCursor;
+    private FeedCursor aggregateCursor;
 
     /**
      * Constructs a new {@code CursorUpdate} with the given aggregate cursor.
      * @param aggregateCursor the new aggregate cursor
      */
-    public StreamedCursor(String aggregateCursor) {
+    public StreamedCursor(FeedCursor aggregateCursor) {
         super();
         this.aggregateCursor = aggregateCursor;
     }
