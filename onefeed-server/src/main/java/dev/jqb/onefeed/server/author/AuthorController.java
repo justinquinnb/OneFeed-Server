@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +56,9 @@ public class AuthorController {
     public Flux<? extends Actor> getAuthorsStream(
         @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
-        return authorService.getAuthors(authorKeys.stream().map(ActorKey::fromKeyString).toList());
+        List<ActorKey> actorKeys = authorKeys.stream().map(ActorKey::fromKeyString).toList();
+        Set<ActorKey> uniqueKeys = Set.copyOf(actorKeys);
+        return authorService.getAuthors(uniqueKeys);
     }
 
     /**

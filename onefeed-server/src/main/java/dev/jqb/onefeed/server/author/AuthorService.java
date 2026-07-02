@@ -12,6 +12,7 @@ import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class AuthorService {
      * @param authorKeys the keys of the authors to retrieve
      * @return a stream of {@link Actor}s as they arrive from their platforms' API
      */
-    public Flux<OneFeedActor> getAuthors(List<ActorKey> authorKeys) {
+    public Flux<OneFeedActor> getAuthors(Set<ActorKey> authorKeys) {
         List<Mono<OneFeedActor>> normalizedAuthorMonos = new ArrayList<>();
         for (ActorKey authorKey : authorKeys) {
             normalizedAuthorMonos.add(getAuthor(authorKey));

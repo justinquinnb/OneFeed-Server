@@ -11,8 +11,10 @@ import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
+import dev.jqb.onefeed.core.feed.UnknownFeedIdException;
 import dev.jqb.onefeed.core.provider.Provider;
 import dev.jqb.onefeed.server.feed.FeedRegistry;
+import dev.jqb.onefeed.server.feed.FeedService;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,15 +45,23 @@ public class AggregationService {
     @Getter
     private Cacher<OneFeedContent, OneFeedActor> cache;
 
-    private final FeedRegistry feedRegistry;
-    private final ProviderRegistry providerRegistry;
+    private final FeedService feedService;
 
     @Autowired
-    public AggregationService(FeedRegistry feedRegistry, ProviderRegistry providerRegistry) {
-        this.feedRegistry = feedRegistry;
-        this.providerRegistry = providerRegistry;
+    public AggregationService(FeedService feedService) {
+        this.feedService = feedService;
     }
 
+    /**
+     * Aggregates the {@code amount} most recent content from the feeds with the given
+     * {@code feedIds}, the final aggregation adhering to the options specified by {@code options}.
+     *
+     * @param amount the amount of content to retrieve
+     * @param feedIds the IDs of the feeds to aggregate content from
+     * @param options the options dictating the final aggregation
+     *
+     * @return the aggregated content
+     */
     public Flux<OneFeedContent> aggregate(
         int amount,
         List<FeedId> feedIds,
@@ -60,6 +70,18 @@ public class AggregationService {
         return aggregate(amount, feedIds, null, options);
     }
 
+    /**
+     * Aggregates the {@code amount} most recent content from the feeds with the given
+     * {@code feedIds}, the final aggregation adhering to the options specified by {@code options}.
+     *
+     * @param amount the amount of content to retrieve
+     * @param feedIds the IDs of the feeds to aggregate content from
+     * @param aggregateCursor the aggregate {@link FeedCursor} representing the first piece of
+     *                        content to start retrieving after for each feed
+     * @param options the options dictating the final aggregation
+     *
+     * @return the aggregated content
+     */
     public Flux<OneFeedContent> aggregate(
         int amount,
         List<FeedId> feedIds,
@@ -67,94 +89,31 @@ public class AggregationService {
         AggregationOptions options
     ) {
         Map<FeedId, Integer> targetAmounts = options.getTargetAmounts(amount);
-        List<Feed<? extends Content>> feeds = new ArrayList<>(feedIds.size());
-        Map<String, ContentTransformer<? extends Content, OneFeedContent>> normalizers =
-            new HashMap<>();
-        Map<FeedId, Integer> remainingContentAmounts = new HashMap<>(targetAmounts);
 
-        Map<FeedId, FeedCursor> cursors = new HashMap<>();
+        Map<FeedId, FeedCursor> feedCursors = null;
         if (aggregateCursor != null) {
-            Aggregation.decodeAggregateCursor(aggregateCursor);
+            feedCursors = Aggregation.decodeAggregateCursor(aggregateCursor);
         }
-
-        // Check the cache first
-        double predictedCacheHitPercent = 0.75;
-        int predictedCacheHits = (int) Math.ceil(amount * predictedCacheHitPercent);
-        List<OneFeedContent> cachedContent = new ArrayList<>(predictedCacheHits);
+        List<Flux<OneFeedContent>> contentStreams = new ArrayList<>();
 
         for (FeedId feedId : feedIds) {
-            // Retrieve the requested feeds
-            Optional<Feed<? extends Content>> possibleFeed = feedRegistry.getFeed(feedId);
-            Optional<Provider<? extends Content, ? extends Actor>> possibleProvider =
-                providerRegistry.getProvider(feedId);
-            if (possibleFeed.isEmpty() || possibleProvider.isEmpty()) {
-                continue;
-            }
-            Feed<? extends Content> feed = possibleFeed.get();
-            Provider<? extends Content, ? extends Actor> provider = possibleProvider.get();
-
-            // Keep tabs of the requested feeds and their normalizers
-            feeds.add(feed);
-            normalizers.put(feedId.getProviderId(), provider.getContentNormalizer());
-
-            // Get the cached content for the feed
-            List<OneFeedContent> cachedFeedContent = fetchFromCacheIfAble(feedId,
-                targetAmounts.get(feedId), cursors.get(feedId));
-
-            cachedFeedContent.sort(Content::compareTo);
-            cachedContent.addAll(cachedFeedContent);
-            remainingContentAmounts.put(feedId,
-                targetAmounts.get(feedId) - cachedFeedContent.size());
-        }
-
-        // Fetch any remaining content from the platforms themselves
-        if (cachedContent.size() >= amount) {
-            return Flux.fromIterable(cachedContent);
-        }
-
-        FeedCursor remainingAggregateCursor = Aggregation.generateAggregateCursor(cachedContent);
-        FeedId feedId = new FeedId("onefeed-aggregator", "custom");
-        options.setFeedWeights(remainingContentAmounts);
-        Aggregation<OneFeedContent> aggregation =
-            new Aggregation<>(feedId, feeds, normalizers, options);
-
-        int totalRemainingAmount = amount - cachedContent.size();
-        return aggregation.fetchRecentContent(totalRemainingAmount, remainingAggregateCursor)
-            .doOnNext(this::cacheIfAble)
-            .mergeWith(Flux.fromIterable(cachedContent));
-    }
-
-    /**
-     * Fetches the given amount of content from the cache if the cache is set.
-     * @param feedId the ID of the feed to retrieve content from
-     * @param amount the amount of content to retrieve
-     * @param cursor the cursor to retrieve content after, inclusive
-     * @return the desired content from the cache
-     */
-    private List<OneFeedContent> fetchFromCacheIfAble(FeedId feedId, int amount, FeedCursor cursor) {
-        if (cache == null) {
-            return List.of();
-        }
-
-        try {
-            if (cursor == null) {
-                return cache.fetchRecentContent(feedId, amount);
+            Flux<OneFeedContent> contentStream;
+            if (aggregateCursor == null || feedCursors.get(feedId) == null) {
+                contentStream = feedService.getRecentContent(
+                        feedId, targetAmounts.get(feedId), feedCursors.get(feedId));
+            } else {
+                contentStream = feedService.getRecentContent(
+                    feedId, targetAmounts.get(feedId));
             }
 
-            return cache.fetchRecentContent(feedId, amount, cursor);
-        } catch (Exception e) {
-            logger.error("Error fetching content from cache", e);
-            return List.of();
+            contentStreams.add(
+                contentStream
+                    .doOnError(err -> logger.warn(
+                        "Error fetching content from feed '{}': {}", feedId, err.getStackTrace()))
+                    .onErrorComplete()
+            );
         }
-    }
 
-    /**
-     * Caches the given content if the cache is set.
-     * @param content the piece of {@link OneFeedContent} to cache if the cache is set
-     */
-    private void cacheIfAble(OneFeedContent content) {
-        if (cache != null) {
-            cache.cacheContent(List.of(content));
-        }
+        return Flux.merge(contentStreams);
     }
 }

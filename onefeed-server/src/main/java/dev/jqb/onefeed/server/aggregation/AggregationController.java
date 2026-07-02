@@ -24,8 +24,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +39,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Endpoints to get aggregations of content from multiple feeds
+ * Endpoints to get aggregations of content from multiple feeds at once
  */
 @RestController
 @Validated
@@ -49,26 +51,29 @@ public class AggregationController {
     private final ProviderRegistry providerRegistry;
 
     @Autowired
-    public AggregationController(AggregationService aggregationService,
-        AuthorService authorService,
-        ProviderRegistry providerRegistry) {
+    public AggregationController(AggregationService aggregationService, AuthorService authorService,
+        ProviderRegistry providerRegistry
+    ) {
         this.aggregationService = aggregationService;
         this.authorService = authorService;
         this.providerRegistry = providerRegistry;
     }
 
     /**
-     * Gets a stream of content and authors representing the desired data from the given feeds.
+     * Gets a stream of content and (optionally) its author and platform data from the given feeds.
      *
-     * @param amount the total amount of content to retrieve
+     * @param amount the total amount of content to try getting
      * @param customAggregation the combination of feed IDs and optional weights to use in the
      *                          aggregation
      * @param includeAuthors whether to include the authors of the aggregated content
      *                       (optional, defaults to {@code true})
+     * @param includePlatforms whether to include the data about each feed's platform (optional,
+     *                         defaults to {@code false})
      * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
      *
      * @return a stream of content and authors representing the desired data from the given feeds,
-     * emitted as soon as it's available
+     * emitted as soon as it's available. If a {@link FeedId} in the {@code customAggregation}
+     * is invalid, data from it will not be included in the aggregation.
      */
     @PostMapping("/custom/stream")
     public Flux<StreamData> getCustomAggregationStream(
@@ -105,8 +110,10 @@ public class AggregationController {
 
         // Collect all the content for aggregate cursor generation
         List<OneFeedContent> allContent = new ArrayList<>();
-        List<ActorKey> authorKeys = new ArrayList<>();
+        Set<ActorKey> authorKeys = new HashSet<>();
 
+        // TODO!! probably need to change this a bit bc authorKeys won't have anything by the
+        // time the below authorService call needs it
         Flux<StreamedContent> contentUpdateStream = contentStream
             .doOnNext((ofc) -> {
                 allContent.add(ofc);
@@ -116,15 +123,15 @@ public class AggregationController {
             .map(StreamedContent::new);
 
         // Optionally get the author stream
-        Flux<StreamedAuthor> authorUpdateStream;
+        Flux<StreamedAuthor> authorStream;
         if (includeAuthors) {
-            authorUpdateStream = authorService.getAuthors(authorKeys).map(StreamedAuthor::new);
+            authorStream = authorService.getAuthors(authorKeys).map(StreamedAuthor::new);
         } else {
-            authorUpdateStream = Flux.empty();
+            authorStream = Flux.empty();
         }
 
         // Optionally get the platform data
-        Flux<StreamedPlatform> platformUpdateStream;
+        Flux<StreamedPlatform> platformStream;
         if (includePlatforms) {
             List<StreamedPlatform> platforms = new ArrayList<>();
             for (FeedId feedId : feedIds) {
@@ -133,12 +140,12 @@ public class AggregationController {
                     platforms.add(new StreamedPlatform(platform));
                 }
             }
-            platformUpdateStream = Flux.fromIterable(platforms);
+            platformStream = Flux.fromIterable(platforms);
         } else {
-            platformUpdateStream = Flux.empty();
+            platformStream = Flux.empty();
         }
 
-        return Flux.merge(contentUpdateStream, authorUpdateStream, platformUpdateStream)
+        return Flux.merge(contentUpdateStream, authorStream, platformStream)
             .concatWith(
                 Mono.fromCallable(
                     () -> new StreamedCursor(Aggregation.generateAggregateCursor(allContent))
@@ -147,17 +154,21 @@ public class AggregationController {
     }
 
     /**
-     * Gets a complete aggregation of the desired amount of content from the given feeds.
+     * Gets a complete aggregation of content and (optionally) its author and platform data from the
+     * given feeds.
      *
      * @param amount the total amount of content to retrieve
      * @param customAggregation the combination of feed IDs and optional weights to use in the
      *                          aggregation
      * @param includeAuthors whether to include the authors of the aggregated content
      *                       (optional, defaults to {@code true})
+     * @param includePlatforms whether to include the data about each feed's platform (optional,
+     *                         defaults to {@code false})
      * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
      *
-     * @return complete, structured aggregation data of the desired amount of content from the given
-     * feeds
+     * @return complete, structured aggregation data of the desired amount of content, author, and
+     * platform data from the given feeds. If a {@link FeedId} in the {@code customAggregation}
+     * is invalid, data from it will not be included in the aggregation.
      */
     @PostMapping("/custom/batch")
     public AggregationResponse getCustomAggregationBatch(
