@@ -2,7 +2,6 @@ package dev.jqb.onefeed.server.feed;
 
 import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.actor.ActorKey;
-import dev.jqb.onefeed.core.aggregation.Aggregation;
 import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.feed.Feed;
@@ -10,9 +9,7 @@ import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.feed.FeedResponse;
 import dev.jqb.onefeed.core.platform.Platform;
-import dev.jqb.onefeed.server.aggregation.AggregationService;
 import dev.jqb.onefeed.server.author.AuthorService;
-import dev.jqb.onefeed.server.model.CustomAggregation;
 import dev.jqb.onefeed.server.model.StreamData;
 import dev.jqb.onefeed.server.model.StreamedAuthor;
 import dev.jqb.onefeed.server.model.StreamedContent;
@@ -20,7 +17,6 @@ import dev.jqb.onefeed.server.model.StreamedCursor;
 import dev.jqb.onefeed.server.model.StreamedPlatform;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,8 +95,10 @@ public class FeedController {
         Flux<StreamedContent> contentUpdateStream = contentStream
             .doOnNext((ofc) -> {
                 allContent.add(ofc);
-                authorKeys.addAll(ofc.getAuthorIds().stream().map((
-                    id) -> new ActorKey(ofc.getFeedId().getProviderId(), id)).toList());
+                authorKeys.addAll(ofc.getAuthorIds().stream().map(
+                    authorId -> new ActorKey(
+                        ofc.getFeedId().getProviderId(), authorId)
+                    ).toList());
             })
             .map(StreamedContent::new);
 

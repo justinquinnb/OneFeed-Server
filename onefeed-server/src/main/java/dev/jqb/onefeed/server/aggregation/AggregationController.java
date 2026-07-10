@@ -117,8 +117,10 @@ public class AggregationController {
         Flux<StreamedContent> contentUpdateStream = contentStream
             .doOnNext((ofc) -> {
                 allContent.add(ofc);
-                authorKeys.addAll(ofc.getAuthorIds().stream().map((
-                    id) -> new ActorKey(ofc.getFeedId().getProviderId(), id)).toList());
+                authorKeys.addAll(ofc.getAuthorIds().stream()
+                    .map(authorId -> new ActorKey(
+                        ofc.getFeedId().getProviderId(), authorId)
+                    ).toList());
             })
             .map(StreamedContent::new);
 
