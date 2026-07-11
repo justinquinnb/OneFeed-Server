@@ -91,6 +91,22 @@ public class FeedService {
         }
 
         int remainingContentNeeded = amount - cachedContent.size();
+
+        // Cache is empty, so fetch everything from the platform itself
+        if (remainingContentNeeded == amount) {
+            Flux<? extends Content> baseContentStream;
+            if (cursor != null) {
+                baseContentStream = feed.fetchRecentContent(remainingContentNeeded, cursor);
+            } else {
+                baseContentStream = feed.fetchRecentContent(remainingContentNeeded);
+            }
+
+            return baseContentStream
+                .map(normalizer::transform)
+                .doOnNext(this::cacheIfAble)
+                .mergeWith(Flux.fromIterable(cachedContent));
+        }
+
         FeedCursor newCursor = Feed.generateCursor(cachedContent);
 
         return feed.fetchRecentContent(remainingContentNeeded, newCursor)

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.support.JacksonHandlerInstantiator;
 
 /**
  * Tells Jackson to search for our custom
@@ -16,9 +15,9 @@ import org.springframework.http.support.JacksonHandlerInstantiator;
 public class OneFeedJacksonConfig {
     @Bean
     public JsonMapperBuilderCustomizer jacksonHandlerCustomizer(
-        AutowireCapableBeanFactory beanFactory) {
+        AutowireCapableBeanFactory beanFactory
+    ) {
         return builder -> {
-            builder.handlerInstantiator(new JacksonHandlerInstantiator(beanFactory));
             builder.addMixIn(Content.class, PluginMixIn.class);
             builder.addMixIn(Actor.class, PluginMixIn.class);
         };

@@ -14,7 +14,8 @@ import lombok.Setter;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = StreamedContent.class, name = "CONTENT"),
     @JsonSubTypes.Type(value = StreamedAuthor.class, name = "AUTHOR"),
-    @JsonSubTypes.Type(value = StreamedCursor.class, name = "CURSOR")
+    @JsonSubTypes.Type(value = StreamedCursor.class, name = "CURSOR"),
+    @JsonSubTypes.Type(value = StreamedPlatform.class, name = "PLATFORM")
 })
 @Getter
 @Setter

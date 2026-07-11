@@ -38,7 +38,7 @@ public class AuthorService {
     @Getter
     private Cacher<OneFeedContent, OneFeedActor> cache;
 
-    private ProviderRegistry providerRegistry;
+    private final ProviderRegistry providerRegistry;
 
     @Autowired
     public AuthorService(ProviderRegistry providerRegistry) {

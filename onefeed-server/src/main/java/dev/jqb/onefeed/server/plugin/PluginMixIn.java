@@ -1,5 +1,6 @@
 package dev.jqb.onefeed.server.plugin;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.databind.annotation.JsonTypeIdResolver;
 
 /**
@@ -7,4 +8,5 @@ import tools.jackson.databind.annotation.JsonTypeIdResolver;
  * the {@link PluginTypeIdResolver}
  */
 @JsonTypeIdResolver(PluginTypeIdResolver.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public interface PluginMixIn {}

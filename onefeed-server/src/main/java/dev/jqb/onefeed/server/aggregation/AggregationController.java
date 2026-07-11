@@ -6,7 +6,6 @@ import dev.jqb.onefeed.core.aggregation.Aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
 import dev.jqb.onefeed.core.aggregation.AggregationResponse;
 import dev.jqb.onefeed.core.content.Content;
-import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.platform.Platform;
@@ -99,60 +98,69 @@ public class AggregationController {
 
         // Get the content stream
         AggregationOptions aggOptions = new AggregationOptions(weights);
-        Flux<OneFeedContent> contentStream;
+        Flux<? extends Content> unmappedContentStream;
 
         if (aggregateCursor != null && !aggregateCursor.isBlank()) {
             FeedCursor cursor = FeedCursor.fromString(aggregateCursor);
-            contentStream = aggregationService.aggregate(amount, feedIds, cursor, aggOptions);
+            unmappedContentStream = aggregationService.aggregate(amount, feedIds, cursor, aggOptions);
         } else {
-            contentStream = aggregationService.aggregate(amount, feedIds, aggOptions);
+            unmappedContentStream = aggregationService.aggregate(amount, feedIds, aggOptions);
         }
 
         // Collect all the content for aggregate cursor generation
-        List<OneFeedContent> allContent = new ArrayList<>();
         Set<ActorKey> authorKeys = new HashSet<>();
+        List<Content> allContent = new ArrayList<>();
 
-        // TODO!! probably need to change this a bit bc authorKeys won't have anything by the
-        // time the below authorService call needs it
-        Flux<StreamedContent> contentUpdateStream = contentStream
-            .doOnNext((ofc) -> {
-                allContent.add(ofc);
-                authorKeys.addAll(ofc.getAuthorIds().stream()
-                    .map(authorId -> new ActorKey(
-                        ofc.getFeedId().getProviderId(), authorId)
-                    ).toList());
-            })
-            .map(StreamedContent::new);
+        Flux<StreamData> contentStream = unmappedContentStream.doOnNext(content ->
+            {
+                if (!includeAuthors) {
+                    return;
+                }
 
-        // Optionally get the author stream
-        Flux<StreamedAuthor> authorStream;
-        if (includeAuthors) {
-            authorStream = authorService.getAuthors(authorKeys).map(StreamedAuthor::new);
-        } else {
-            authorStream = Flux.empty();
-        }
+                authorKeys.addAll(content.getAuthorIds().stream().map(authorId ->
+                    new ActorKey(content.getProviderId(), authorId)).toList()
+                );
+
+                allContent.add(content);
+            }
+        ).map(StreamedContent::new);
 
         // Optionally get the platform data
-        Flux<StreamedPlatform> platformStream;
+        Flux<StreamData> platformStream;
         if (includePlatforms) {
-            List<StreamedPlatform> platforms = new ArrayList<>();
+            Set<String> providerIds = new HashSet<>();
             for (FeedId feedId : feedIds) {
-                if (providerRegistry.getProvider(feedId).isPresent()) {
-                    Platform platform = providerRegistry.getProvider(feedId).get().getPlatform();
+                providerIds.add(feedId.getProviderId());
+            }
+
+            List<StreamedPlatform> platforms = new ArrayList<>();
+            for (String providerId : providerIds) {
+                if (providerRegistry.getProvider(providerId).isPresent()) {
+                    Platform platform = providerRegistry.getProvider(providerId).get().getPlatform();
                     platforms.add(new StreamedPlatform(platform));
                 }
             }
+
             platformStream = Flux.fromIterable(platforms);
         } else {
             platformStream = Flux.empty();
         }
 
-        return Flux.merge(contentUpdateStream, authorStream, platformStream)
-            .concatWith(
-                Mono.fromCallable(
-                    () -> new StreamedCursor(Aggregation.generateAggregateCursor(allContent))
-                )
-            );
+        return Flux.merge(
+            contentStream.concatWith(
+                (includeAuthors) ?
+                /*
+                This is here to make sure that the stream is initialized at a time when the author key
+                set is COMPLETE, else we run into the issue where no author keys exist to retrieve.
+                 */
+                    Flux.fromIterable(authorKeys)
+                        .flatMap(authorService::getAuthor)
+                        .map(StreamedAuthor::new) : Flux.empty()
+            ).concatWith(
+                // Similar reasoning as above
+                Mono.fromCallable(() -> new StreamedCursor(Aggregation.generateAggregateCursor(allContent)))
+            ),
+            platformStream);
     }
 
     /**

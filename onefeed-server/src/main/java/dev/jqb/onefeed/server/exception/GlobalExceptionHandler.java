@@ -4,6 +4,9 @@ import dev.jqb.onefeed.core.feed.MalformedFeedIdException;
 import dev.jqb.onefeed.core.feed.UnknownFeedIdException;
 import dev.jqb.onefeed.server.aggregation.MalformedAggregateCursorException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +20,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MalformedFeedIdException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -95,6 +99,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ProblemDetails handleException(Exception e) {
+        logger.error("Error processing request: {}\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
         return new ProblemDetails(
             "https://github.com/justinquinnb/OneFeed/wiki",
             "Internal Server Error",

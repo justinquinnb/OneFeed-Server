@@ -1,7 +1,6 @@
 package dev.jqb.onefeed.server.plugin;
 
 import dev.jqb.onefeed.core.plugin.PluginConfigsFile;
-import dev.jqb.onefeed.server.feed.FeedRegistry;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +51,6 @@ public class PluginConfig {
 
     @Bean
     public OneFeedPluginManager oneFeedPluginManager(PluginConfigsFile pluginConfigsFile,
-        PluginTypeRegistry pluginTypeRegistry, FeedRegistry feedRegistry,
         PluginStateListener pluginStateListener
     ) {
         OneFeedPluginManager pluginManager = new OneFeedPluginManager(Path.of(directoryPath),

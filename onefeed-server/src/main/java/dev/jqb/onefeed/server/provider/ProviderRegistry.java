@@ -62,4 +62,13 @@ public class ProviderRegistry {
     ) {
         return Optional.ofNullable(providers.get(providerId.getProviderId()));
     }
+
+    /**
+     * Gets the provider for the given provider ID.
+     * @param providerId the ID of the provider to retrieve
+     * @return the provider for the given provider ID
+     */
+    public Optional<Provider<? extends Content, ? extends Actor>> getProvider(String providerId) {
+        return Optional.ofNullable(providers.get(providerId));
+    }
 }

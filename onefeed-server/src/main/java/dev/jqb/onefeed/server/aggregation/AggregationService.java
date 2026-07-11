@@ -91,10 +91,10 @@ public class AggregationService {
             Flux<OneFeedContent> contentStream;
             if (aggregateCursor == null || feedCursors.get(feedId) == null) {
                 contentStream = feedService.getRecentContent(
-                        feedId, targetAmounts.get(feedId), feedCursors.get(feedId));
+                    feedId, targetAmounts.get(feedId));
             } else {
                 contentStream = feedService.getRecentContent(
-                    feedId, targetAmounts.get(feedId));
+                    feedId, targetAmounts.get(feedId), feedCursors.get(feedId));
             }
 
             contentStreams.add(
