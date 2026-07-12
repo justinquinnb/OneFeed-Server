@@ -1,27 +1,43 @@
-package dev.jqb.onefeed.server.config;
-
-import dev.jqb.onefeed.core.actor.Actor;
-import dev.jqb.onefeed.core.content.Content;
-import dev.jqb.onefeed.server.plugin.PluginMixIn;
-import dev.jqb.onefeed.server.plugin.PluginTypeRegistry;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-/**
- * Tells Jackson how to handle external classes by mixing in an interface pointing to the
- * {@link PluginTypeRegistry}
- */
-@Configuration
-public class OneFeedJacksonConfig {
-    @Bean
-    public JsonMapperBuilderCustomizer jacksonHandlerCustomizer(
-        AutowireCapableBeanFactory beanFactory
-    ) {
-        return builder -> {
-            builder.addMixIn(Content.class, PluginMixIn.class);
-            builder.addMixIn(Actor.class, PluginMixIn.class);
-        };
-    }
-}
+//package dev.jqb.onefeed.server.config;
+//
+//import com.fasterxml.jackson.annotation.JsonTypeInfo;
+//import dev.jqb.onefeed.server.plugin.PluginTypeIdResolver;
+//import dev.jqb.onefeed.server.plugin.PluginTypeRegistry;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+//
+///**
+// * Tells Jackson how to handle external classes
+// * {@link PluginTypeRegistry}
+// */
+//@Configuration
+//public class OneFeedJacksonConfig {
+//
+//    private final PluginTypeIdResolver pluginTypeIdResolver;
+//
+//    @Autowired
+//    public OneFeedJacksonConfig(PluginTypeIdResolver pluginTypeIdResolver) {
+//        this.pluginTypeIdResolver = pluginTypeIdResolver;
+//    }
+//
+//    @Bean
+//    public JsonMapperBuilderCustomizer customTypeResolverCustomizer() {
+//        return builder -> {
+//            StdTypeResolverBuilder typer = new StdTypeResolverBuilder();
+//            JsonTypeInfo.Value settings = JsonTypeInfo.Value.construct(
+//                JsonTypeInfo.Id.CUSTOM,
+//                JsonTypeInfo.As.PROPERTY,
+//                "@type",
+//                null,
+//                false,
+//                null
+//            );
+//
+//            typer.init(settings, pluginTypeIdResolver);
+//            builder.setDefaultTyping(typer);
+//        };
+//    }
+//}
