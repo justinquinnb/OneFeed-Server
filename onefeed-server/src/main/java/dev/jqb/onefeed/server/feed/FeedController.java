@@ -2,6 +2,7 @@ package dev.jqb.onefeed.server.feed;
 
 import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.actor.ActorKey;
+import dev.jqb.onefeed.core.compat.rss.Rss2File;
 import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedCursor;
@@ -26,6 +27,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,7 +74,7 @@ public class FeedController {
      *
      * @return a stream of content and authors representing the desired data from the given feed
      */
-    @GetMapping("/stream/{providerId}/{feedName}")
+    @GetMapping("{providerId}/{feedName}/stream")
     public Flux<StreamData> getFeedStream(
         @PathVariable String providerId,
         @PathVariable String feedName,
@@ -154,7 +156,7 @@ public class FeedController {
      * @return a complete batch of content and authors representing the desired data from the given
      * feed
      */
-    @GetMapping("batch/{providerId}/{feedName}")
+    @GetMapping("{providerId}/{feedName}/batch")
     public FeedResponse getFeedBatch(
         @PathVariable String providerId,
         @PathVariable String feedName,
@@ -195,5 +197,24 @@ public class FeedController {
         }
 
         return new FeedResponse(authors, platform, content, nextCursor);
+    }
+
+    /**
+     * Gets a complete batch of content and (optionally) authors and platform data from the desired
+     * feed.
+     *
+     * @param providerId the ID of the provider whose feed's content to retrieve
+     * @param feedName the name of the feed whose content to retrieve
+     *
+     * @return a complete batch of content and authors representing the desired data from the given
+     * feed
+     */
+    @GetMapping(path="{providerId}/{feedName}/rss", produces=MediaType.APPLICATION_RSS_XML_VALUE)
+    public Rss2File getFeedRss(
+        @PathVariable String providerId,
+        @PathVariable String feedName
+    ) {
+        FeedId feedId = new FeedId(providerId, feedName);
+        return feedService.getAsRssFeed(feedId);
     }
 }

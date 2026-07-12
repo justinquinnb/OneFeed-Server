@@ -5,6 +5,7 @@ import dev.jqb.onefeed.core.actor.ActorKey;
 import dev.jqb.onefeed.core.aggregation.Aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
 import dev.jqb.onefeed.core.aggregation.AggregationResponse;
+import dev.jqb.onefeed.core.compat.rss.Rss2File;
 import dev.jqb.onefeed.core.content.Content;
 import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
@@ -28,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -223,25 +226,17 @@ public class AggregationController {
         return new AggregationResponse(authors, platforms, content, nextCursor);
     }
 
-    /**
-     * Gets an RSS-compatible aggregation of the desired amount of content from the given feeds.
-     *
-     * @param amount the total amount of content to retrieve
-     * @param customAggregation the combination of feed IDs and optional weights to use in the
-     *                          aggregation
-     * @param includeAuthors whether to include the authors of the aggregated content
-     *                       (optional, defaults to {@code true})
-     * @param aggregateCursor the point to start retrieving content after, inclusively (optional)
-     *
-     * @return an RSS-compatible aggregation of the desired amount of content from the given feeds
-     */
-//    @PostMapping("/rss/custom")
-//    public RssFeed getCustomAggregationRss(
-//        @RequestParam @Min(1) int amount,
-//        @RequestBody @Valid CustomAggregation customAggregation,
-//        @RequestParam(defaultValue = "true") Boolean includeAuthors,
-//        @RequestParam(required = false) String aggregateCursor
-//    ) {
+    // TODO implement alongside presets. Can't do it until then because RSS feeds must be get
+    // requests, which the custom variant just can't support (yet?)
+//    /**
+//     * Gets the desired, preconfigured aggregation as an RSS feed.
+//     *
+//     * @param id the ID of the preconfigured aggregation to retrieve
+//     *
+//     * @return an RSS-compatible aggregation of the desired amount of content from the given feeds
+//     */
+//    @PostMapping(path="/rss/preset/{id}", produces=MediaType.APPLICATION_XML_VALUE)
+//    public Rss2File getCustomAggregationRss(@PathVariable String id) {
 //
 //    }
 
