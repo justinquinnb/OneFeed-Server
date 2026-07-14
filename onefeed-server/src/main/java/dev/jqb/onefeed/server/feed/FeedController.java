@@ -203,8 +203,7 @@ public class FeedController {
     }
 
     /**
-     * Gets a complete batch of content and (optionally) authors and platform data from the desired
-     * feed.
+     * Gets a feed's content formatted as a valid RSS XML document.
      *
      * @param providerId the ID of the provider whose feed's content to retrieve
      * @param feedName the name of the feed whose content to retrieve
