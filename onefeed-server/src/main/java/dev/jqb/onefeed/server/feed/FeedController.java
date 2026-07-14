@@ -17,7 +17,9 @@ import dev.jqb.onefeed.server.model.StreamedCursor;
 import dev.jqb.onefeed.server.model.StreamedPlatform;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -205,6 +208,7 @@ public class FeedController {
      *
      * @param providerId the ID of the provider whose feed's content to retrieve
      * @param feedName the name of the feed whose content to retrieve
+     * @param request the HTTP request, used to get the root URL
      *
      * @return a complete batch of content and authors representing the desired data from the given
      * feed
@@ -212,9 +216,10 @@ public class FeedController {
     @GetMapping(path="{providerId}/{feedName}/rss", produces=MediaType.APPLICATION_RSS_XML_VALUE)
     public Rss2File getFeedRss(
         @PathVariable String providerId,
-        @PathVariable String feedName
+        @PathVariable String feedName,
+        HttpServletRequest request
     ) {
         FeedId feedId = new FeedId(providerId, feedName);
-        return feedService.getAsRssFeed(feedId);
+        return feedService.getAsRssFeed(feedId, request.getRequestURL().toString());
     }
 }
