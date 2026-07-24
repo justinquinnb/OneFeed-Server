@@ -1,6 +1,6 @@
-package dev.jqb.onefeed.server.model;
+package dev.jqb.onefeed.server.aggregation;
 
-import dev.jqb.onefeed.server.model.CustomAggregation.WeightedFeed;
+import dev.jqb.onefeed.server.aggregation.CustomAggregation.WeightedFeed;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

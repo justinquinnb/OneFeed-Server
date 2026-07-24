@@ -1,23 +1,23 @@
 package dev.jqb.onefeed.server.aggregation;
 
-import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.actor.ActorKey;
 import dev.jqb.onefeed.core.aggregation.Aggregation;
 import dev.jqb.onefeed.core.aggregation.AggregationOptions;
-import dev.jqb.onefeed.core.aggregation.AggregationResponse;
 import dev.jqb.onefeed.core.content.Content;
+import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.platform.Platform;
+import dev.jqb.onefeed.server.aggregation.CustomAggregation.WeightedFeed;
 import dev.jqb.onefeed.server.author.AuthorService;
-import dev.jqb.onefeed.server.model.CustomAggregation;
-import dev.jqb.onefeed.server.model.CustomAggregation.WeightedFeed;
-import dev.jqb.onefeed.server.model.StreamData;
-import dev.jqb.onefeed.server.model.StreamedAuthor;
-import dev.jqb.onefeed.server.model.StreamedContent;
-import dev.jqb.onefeed.server.model.StreamedCursor;
-import dev.jqb.onefeed.server.model.StreamedPlatform;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
+import dev.jqb.onefeed.server.response.std.AggregationResponse;
+import dev.jqb.onefeed.server.response.std.FeedCursorResponse;
+import dev.jqb.onefeed.server.response.std.OneFeedActorResponse;
+import dev.jqb.onefeed.server.response.std.OneFeedContentResponse;
+import dev.jqb.onefeed.server.response.std.PlatformResponse;
+import dev.jqb.onefeed.server.response.std.StdResponseMapper;
+import dev.jqb.onefeed.server.response.std.Streamable;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -48,14 +48,16 @@ public class AggregationController {
     private final AggregationService aggregationService;
     private final AuthorService authorService;
     private final ProviderRegistry providerRegistry;
+    private final StdResponseMapper responseMapper;
 
     @Autowired
     public AggregationController(AggregationService aggregationService, AuthorService authorService,
-        ProviderRegistry providerRegistry
+        ProviderRegistry providerRegistry, StdResponseMapper responseMapper
     ) {
         this.aggregationService = aggregationService;
         this.authorService = authorService;
         this.providerRegistry = providerRegistry;
+        this.responseMapper = responseMapper;
     }
 
     /**
@@ -75,7 +77,7 @@ public class AggregationController {
      * is invalid, data from it will not be included in the aggregation.
      */
     @PostMapping("/custom/stream")
-    public Flux<StreamData> getCustomAggregationStream(
+    public Flux<Streamable> getCustomAggregationStream(
         @RequestParam @Min(1) int amount,
         @RequestBody @Valid CustomAggregation customAggregation,
         @RequestParam(defaultValue = "true") Boolean includeAuthors,
@@ -98,20 +100,20 @@ public class AggregationController {
 
         // Get the content stream
         AggregationOptions aggOptions = new AggregationOptions(weights);
-        Flux<? extends Content> unmappedContentStream;
+        Flux<OneFeedContent> contentStream;
 
         if (aggregateCursor != null && !aggregateCursor.isBlank()) {
             FeedCursor cursor = FeedCursor.fromString(aggregateCursor);
-            unmappedContentStream = aggregationService.aggregate(amount, feedIds, cursor, aggOptions);
+            contentStream = aggregationService.aggregate(amount, feedIds, cursor, aggOptions);
         } else {
-            unmappedContentStream = aggregationService.aggregate(amount, feedIds, aggOptions);
+            contentStream = aggregationService.aggregate(amount, feedIds, aggOptions);
         }
 
         // Collect all the content for aggregate cursor generation
         Set<ActorKey> authorKeys = new HashSet<>();
         List<Content> allContent = new ArrayList<>();
 
-        Flux<StreamData> contentStream = unmappedContentStream.doOnNext(content ->
+        Flux<Streamable> contentResponseStream = contentStream.doOnNext(content ->
             {
                 if (!includeAuthors) {
                     return;
@@ -123,44 +125,46 @@ public class AggregationController {
 
                 allContent.add(content);
             }
-        ).map(StreamedContent::new);
+        ).map(responseMapper::toOneFeedContentResponse);
 
         // Optionally get the platform data
-        Flux<StreamData> platformStream;
+        Flux<Streamable> platformResponseStream;
         if (includePlatforms) {
             Set<String> providerIds = new HashSet<>();
             for (FeedId feedId : feedIds) {
                 providerIds.add(feedId.getProviderId());
             }
 
-            List<StreamedPlatform> platforms = new ArrayList<>();
+            List<PlatformResponse> platforms = new ArrayList<>();
             for (String providerId : providerIds) {
                 if (providerRegistry.getProvider(providerId).isPresent()) {
                     Platform platform = providerRegistry.getProvider(providerId).get().getPlatform();
-                    platforms.add(new StreamedPlatform(platform));
+                    platforms.add(responseMapper.toPlatformResponse(platform));
                 }
             }
 
-            platformStream = Flux.fromIterable(platforms);
+            platformResponseStream = Flux.fromIterable(platforms);
         } else {
-            platformStream = Flux.empty();
+            platformResponseStream = Flux.empty();
         }
 
         return Flux.merge(
-            contentStream.concatWith(
+            contentResponseStream.concatWith(
                 (includeAuthors) ?
                 /*
-                This is here to make sure that the stream is initialized at a time when the author key
-                set is COMPLETE, else we run into the issue where no author keys exist to retrieve.
+                This is here to make sure that the stream is initialized at a time when the author
+                key set is COMPLETE, else we run into the issue where no author keys exist to
+                retrieve.
                  */
                     Flux.fromIterable(authorKeys)
                         .flatMap(authorService::getAuthor)
-                        .map(StreamedAuthor::new) : Flux.empty()
+                        .map(responseMapper::toOneFeedActorResponse) : Flux.empty()
             ).concatWith(
                 // Similar reasoning as above
-                Mono.fromCallable(() -> new StreamedCursor(Aggregation.generateAggregateCursor(allContent)))
+                Mono.fromCallable(() -> responseMapper.toCursorResponse(
+                    Aggregation.generateAggregateCursor(allContent)))
             ),
-            platformStream);
+            platformResponseStream);
     }
 
     /**
@@ -188,31 +192,31 @@ public class AggregationController {
         @RequestParam(defaultValue = "false") Boolean includePlatforms,
         @RequestParam(required = false) String aggregateCursor
     ) {
-        Flux<StreamData> stream = getCustomAggregationStream(
+        Flux<Streamable> stream = getCustomAggregationStream(
             amount, customAggregation, includeAuthors, includePlatforms, aggregateCursor);
 
-        List<StreamData> streamData = stream.collectList().block();
+        List<Streamable> streamData = stream.collectList().block();
 
-        List<Content> content = new ArrayList<>();
-        Map<String, Platform> platforms = new HashMap<>();
-        Map<ActorKey, Actor> authors = new HashMap<>();
+        List<OneFeedContentResponse> content = new ArrayList<>();
+        Map<String, PlatformResponse> platforms = new HashMap<>();
+        Map<ActorKey, OneFeedActorResponse> authors = new HashMap<>();
 
-        FeedCursor nextCursor = null;
+        FeedCursorResponse nextCursor = null;
 
         // Organize the data
-        for (StreamData streamDataObj : streamData) {
+        for (Streamable streamDataObj : streamData) {
             switch (streamDataObj) {
-                case StreamedContent cu:
-                    content.add(cu.getContent());
+                case OneFeedContentResponse c:
+                    content.add(c);
                     break;
-                case StreamedAuthor au:
-                    authors.put(au.getAuthor().getKey(), au.getAuthor());
+                case OneFeedActorResponse a:
+                    authors.put(new ActorKey(a.providerId(), a.externalRef().id()), a);
                     break;
-                case StreamedCursor cu:
-                    nextCursor = cu.getAggregateCursor();
+                case FeedCursorResponse f:
+                    nextCursor = f;
                     break;
-                case StreamedPlatform pu:
-                    platforms.put(pu.getPlatform().getProviderId(), pu.getPlatform());
+                case PlatformResponse p:
+                    platforms.put(p.providerId(), p);
                     break;
                 default:
                     break;
@@ -245,7 +249,7 @@ public class AggregationController {
 //     * @return the preconfigured aggregation
 //     */
 //    @GetMapping("/stream/preset/{id}")
-//    public Flux<StreamData> getPreconfiguredAggregationStream(
+//    public Flux<Streamable> getPreconfiguredAggregationStream(
 //        @PathVariable @NotBlank String id,
 //        @RequestParam @Min(1) int amount,
 //        @RequestParam(required = false) String aggregateCursor

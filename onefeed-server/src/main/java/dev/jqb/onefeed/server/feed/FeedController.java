@@ -1,21 +1,22 @@
 package dev.jqb.onefeed.server.feed;
 
-import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.actor.ActorKey;
 import dev.jqb.onefeed.core.compat.rss.Rss2File;
 import dev.jqb.onefeed.core.content.Content;
+import dev.jqb.onefeed.core.content.OneFeedContent;
 import dev.jqb.onefeed.core.feed.Feed;
 import dev.jqb.onefeed.core.feed.FeedCursor;
 import dev.jqb.onefeed.core.feed.FeedId;
-import dev.jqb.onefeed.core.feed.FeedResponse;
 import dev.jqb.onefeed.core.platform.Platform;
 import dev.jqb.onefeed.server.author.AuthorService;
-import dev.jqb.onefeed.server.model.StreamData;
-import dev.jqb.onefeed.server.model.StreamedAuthor;
-import dev.jqb.onefeed.server.model.StreamedContent;
-import dev.jqb.onefeed.server.model.StreamedCursor;
-import dev.jqb.onefeed.server.model.StreamedPlatform;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
+import dev.jqb.onefeed.server.response.std.FeedCursorResponse;
+import dev.jqb.onefeed.server.response.std.FeedResponse;
+import dev.jqb.onefeed.server.response.std.OneFeedActorResponse;
+import dev.jqb.onefeed.server.response.std.OneFeedContentResponse;
+import dev.jqb.onefeed.server.response.std.PlatformResponse;
+import dev.jqb.onefeed.server.response.std.StdResponseMapper;
+import dev.jqb.onefeed.server.response.std.Streamable;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
@@ -25,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -46,19 +45,20 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/feed")
 @Tag(name = "Feed", description = "Endpoints for getting content from a single feed")
 public class FeedController {
-    private static final Logger logger = LoggerFactory.getLogger(FeedController.class);
 
     private final FeedService feedService;
     private final AuthorService authorService;
     private final ProviderRegistry providerRegistry;
+    private final StdResponseMapper responseMapper;
 
     @Autowired
     public FeedController(FeedService feedService, AuthorService authorService,
-        ProviderRegistry providerRegistry
+        ProviderRegistry providerRegistry, StdResponseMapper responseMapper
     ) {
         this.feedService = feedService;
         this.authorService = authorService;
         this.providerRegistry = providerRegistry;
+        this.responseMapper = responseMapper;
     }
 
     /**
@@ -76,7 +76,7 @@ public class FeedController {
      * @return a stream of content and authors representing the desired data from the given feed
      */
     @GetMapping("{providerId}/{feedName}/stream")
-    public Flux<StreamData> getFeedStream(
+    public Flux<Streamable> getFeedStream(
         @PathVariable String providerId,
         @PathVariable String feedName,
         @RequestParam @Min(1) int amount,
@@ -86,18 +86,18 @@ public class FeedController {
     ) {
         // Get the content stream
         FeedId feedId = new FeedId(providerId, feedName);
-        Flux<? extends Content> unmappedContentStream;
+        Flux<OneFeedContent> contentStream;
         if (cursor != null) {
             FeedCursor feedCursor = FeedCursor.fromString(cursor);
-            unmappedContentStream = feedService.getRecentContent(feedId, amount, feedCursor);
+            contentStream = feedService.getRecentContent(feedId, amount, feedCursor);
         } else {
-            unmappedContentStream = feedService.getRecentContent(feedId, amount);
+            contentStream = feedService.getRecentContent(feedId, amount);
         }
 
         Set<ActorKey> authorKeys = new HashSet<>();
         List<Content> allContent = new ArrayList<>();
 
-        Flux<StreamData> contentStream = unmappedContentStream.doOnNext(content ->
+        Flux<Streamable> contentResponseStream = contentStream.doOnNext(content ->
             {
                 if (!includeAuthors) {
                     return;
@@ -109,23 +109,23 @@ public class FeedController {
 
                 allContent.add(content);
             }
-        ).map(StreamedContent::new);
+        ).map(responseMapper::toOneFeedContentResponse);
 
         // Optionally get the platform data
-        Flux<StreamData> platformStream;
+        Flux<Streamable> platformResponseStream;
         if (includePlatforms) {
-            List<StreamedPlatform> platforms = new ArrayList<>();
+            List<PlatformResponse> platforms = new ArrayList<>();
             if (providerRegistry.getProvider(feedId).isPresent()) {
                 Platform platform = providerRegistry.getProvider(feedId).get().getPlatform();
-                platforms.add(new StreamedPlatform(platform));
+                platforms.add(responseMapper.toPlatformResponse(platform));
             }
-            platformStream = Flux.fromIterable(platforms);
+            platformResponseStream = Flux.fromIterable(platforms);
         } else {
-            platformStream = Flux.empty();
+            platformResponseStream = Flux.empty();
         }
 
         return Flux.merge(
-            contentStream.concatWith(
+            contentResponseStream.concatWith(
                 (includeAuthors) ?
                 /*
                 This is here to make sure that the stream is initialized at a time when the author key
@@ -133,12 +133,13 @@ public class FeedController {
                  */
                 Flux.fromIterable(authorKeys)
                     .flatMap(authorService::getAuthor)
-                    .map(StreamedAuthor::new) : Flux.empty()
+                    .map(responseMapper::toOneFeedActorResponse) : Flux.empty()
             ).concatWith(
                 // Similar reasoning as above
-                Mono.fromCallable(() -> new StreamedCursor(Feed.generateCursor(allContent)))
+                Mono.fromCallable(() -> responseMapper.toCursorResponse(Feed.generateCursor(allContent)))
             ),
-            platformStream);
+            platformResponseStream
+            );
     }
 
     /**
@@ -166,31 +167,31 @@ public class FeedController {
         @RequestParam(defaultValue = "false") Boolean includePlatforms,
         @RequestParam(required = false) String cursor
     ) {
-        Flux<StreamData> stream = getFeedStream(providerId, feedName, amount, includeAuthors,
+        Flux<Streamable> stream = getFeedStream(providerId, feedName, amount, includeAuthors,
             includePlatforms, cursor);
 
-        List<StreamData> streamData = stream.collectList().block();
+        List<Streamable> streamData = stream.collectList().block();
 
-        List<Content> content = new ArrayList<>();
-        Platform platform = null;
-        Map<ActorKey, Actor> authors = new HashMap<>();
+        List<OneFeedContentResponse> content = new ArrayList<>();
+        PlatformResponse platform = null;
+        Map<ActorKey, OneFeedActorResponse> authors = new HashMap<>();
 
-        FeedCursor nextCursor = null;
+        FeedCursorResponse nextCursor = null;
 
         // Organize the data
-        for (StreamData streamDataObj : streamData) {
+        for (Streamable streamDataObj : streamData) {
             switch (streamDataObj) {
-                case StreamedContent cu:
-                    content.add(cu.getContent());
+                case OneFeedContentResponse c:
+                    content.add(c);
                     break;
-                case StreamedAuthor au:
-                    authors.put(au.getAuthor().getKey(), au.getAuthor());
+                case OneFeedActorResponse a:
+                    authors.put(new ActorKey(a.providerId(), a.externalRef().id()), a);
                     break;
-                case StreamedCursor cu:
-                    nextCursor = cu.getAggregateCursor();
+                case FeedCursorResponse f:
+                    nextCursor = f;
                     break;
-                case StreamedPlatform pu:
-                    platform = pu.getPlatform();
+                case PlatformResponse p:
+                    platform = p;
                     break;
                 default:
                     break;

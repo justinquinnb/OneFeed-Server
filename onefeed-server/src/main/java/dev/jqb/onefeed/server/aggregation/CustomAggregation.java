@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.server.model;
+package dev.jqb.onefeed.server.aggregation;
 
 import dev.jqb.onefeed.core.feed.FeedId;
 import jakarta.validation.Valid;

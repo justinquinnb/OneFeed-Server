@@ -1,4 +1,4 @@
-package dev.jqb.onefeed.server.model;
+package dev.jqb.onefeed.server.aggregation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

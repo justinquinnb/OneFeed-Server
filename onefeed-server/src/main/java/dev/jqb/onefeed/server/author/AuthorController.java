@@ -1,7 +1,8 @@
 package dev.jqb.onefeed.server.author;
 
-import dev.jqb.onefeed.core.actor.Actor;
 import dev.jqb.onefeed.core.actor.ActorKey;
+import dev.jqb.onefeed.server.response.std.OneFeedActorResponse;
+import dev.jqb.onefeed.server.response.std.StdResponseMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
 import java.util.HashMap;
@@ -27,10 +28,12 @@ import reactor.core.publisher.Mono;
 @Tag(name = "Author", description = "Endpoints for retrieving author data")
 public class AuthorController {
     private final AuthorService authorService;
+    private final StdResponseMapper responseMapper;
 
     @Autowired
-    public AuthorController(AuthorService authorService) {
+    public AuthorController(AuthorService authorService, StdResponseMapper responseMapper) {
         this.authorService = authorService;
+        this.responseMapper = responseMapper;
     }
 
     /**
@@ -41,8 +44,9 @@ public class AuthorController {
      * @see ActorKey
      */
     @GetMapping("/{authorKey}")
-    public Mono<? extends Actor> getAuthor(@PathVariable String authorKey) {
-        return authorService.getAuthor(ActorKey.fromKeyString(authorKey));
+    public Mono<OneFeedActorResponse> getAuthor(@PathVariable String authorKey) {
+        return authorService.getAuthor(ActorKey.fromKeyString(authorKey))
+            .map(responseMapper::toOneFeedActorResponse);
     }
 
     /**
@@ -53,12 +57,12 @@ public class AuthorController {
      * @see ActorKey
      */
     @GetMapping("/stream")
-    public Flux<? extends Actor> getAuthorsStream(
+    public Flux<OneFeedActorResponse> getAuthorsStream(
         @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
         List<ActorKey> actorKeys = authorKeys.stream().map(ActorKey::fromKeyString).toList();
         Set<ActorKey> uniqueKeys = Set.copyOf(actorKeys);
-        return authorService.getAuthors(uniqueKeys);
+        return authorService.getAuthors(uniqueKeys).map(responseMapper::toOneFeedActorResponse);
     }
 
     /**
@@ -69,13 +73,13 @@ public class AuthorController {
      * @see ActorKey
      */
     @GetMapping("/map")
-    public Map<ActorKey, Actor> getAuthorsMap(
+    public Map<ActorKey, OneFeedActorResponse> getAuthorsMap(
         @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
-        List<? extends Actor> authors = getAuthorsStream(authorKeys).collectList().block();
-        Map<ActorKey, Actor> authorMap = new HashMap<>();
-        for (Actor author : authors) {
-            authorMap.put(author.getKey(), author);
+        List<OneFeedActorResponse> authors = getAuthorsStream(authorKeys).collectList().block();
+        Map<ActorKey, OneFeedActorResponse> authorMap = new HashMap<>();
+        for (OneFeedActorResponse author : authors) {
+            authorMap.put(new ActorKey(author.providerId(), author.externalRef().id()), author);
         }
         return authorMap;
     }
