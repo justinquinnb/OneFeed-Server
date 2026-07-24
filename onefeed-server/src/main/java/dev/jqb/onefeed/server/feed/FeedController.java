@@ -10,13 +10,14 @@ import dev.jqb.onefeed.core.feed.FeedId;
 import dev.jqb.onefeed.core.platform.Platform;
 import dev.jqb.onefeed.server.author.AuthorService;
 import dev.jqb.onefeed.server.provider.ProviderRegistry;
+import dev.jqb.onefeed.server.response.StreamElement;
+import dev.jqb.onefeed.server.response.Streamable;
 import dev.jqb.onefeed.server.response.std.FeedCursorResponse;
 import dev.jqb.onefeed.server.response.std.FeedResponse;
 import dev.jqb.onefeed.server.response.std.OneFeedActorResponse;
 import dev.jqb.onefeed.server.response.std.OneFeedContentResponse;
 import dev.jqb.onefeed.server.response.std.PlatformResponse;
 import dev.jqb.onefeed.server.response.std.StdResponseMapper;
-import dev.jqb.onefeed.server.response.std.Streamable;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
@@ -76,7 +77,7 @@ public class FeedController {
      * @return a stream of content and authors representing the desired data from the given feed
      */
     @GetMapping("{providerId}/{feedName}/stream")
-    public Flux<Streamable> getFeedStream(
+    public Flux<StreamElement<? extends Streamable>> getFeedStream(
         @PathVariable String providerId,
         @PathVariable String feedName,
         @RequestParam @Min(1) int amount,
@@ -97,7 +98,7 @@ public class FeedController {
         Set<ActorKey> authorKeys = new HashSet<>();
         List<Content> allContent = new ArrayList<>();
 
-        Flux<Streamable> contentResponseStream = contentStream.doOnNext(content ->
+        Flux<StreamElement<?>> contentResponseStream = contentStream.doOnNext(content ->
             {
                 if (!includeAuthors) {
                     return;
@@ -109,15 +110,16 @@ public class FeedController {
 
                 allContent.add(content);
             }
-        ).map(responseMapper::toOneFeedContentResponse);
+        ).map(responseMapper::toOneFeedContentResponse
+        ).map(StreamElement::new);
 
         // Optionally get the platform data
-        Flux<Streamable> platformResponseStream;
+        Flux<StreamElement<?>> platformResponseStream;
         if (includePlatforms) {
-            List<PlatformResponse> platforms = new ArrayList<>();
+            List<StreamElement<?>> platforms = new ArrayList<>();
             if (providerRegistry.getProvider(feedId).isPresent()) {
                 Platform platform = providerRegistry.getProvider(feedId).get().getPlatform();
-                platforms.add(responseMapper.toPlatformResponse(platform));
+                platforms.add(new StreamElement<>(responseMapper.toPlatformResponse(platform)));
             }
             platformResponseStream = Flux.fromIterable(platforms);
         } else {
@@ -133,10 +135,13 @@ public class FeedController {
                  */
                 Flux.fromIterable(authorKeys)
                     .flatMap(authorService::getAuthor)
-                    .map(responseMapper::toOneFeedActorResponse) : Flux.empty()
+                    .map(responseMapper::toOneFeedActorResponse)
+                    .map(StreamElement::new) : Flux.empty()
             ).concatWith(
                 // Similar reasoning as above
-                Mono.fromCallable(() -> responseMapper.toCursorResponse(Feed.generateCursor(allContent)))
+                Mono.fromCallable(() -> new StreamElement<>(
+                    responseMapper.toCursorResponse(Feed.generateCursor(allContent))
+                ))
             ),
             platformResponseStream
             );
@@ -167,10 +172,10 @@ public class FeedController {
         @RequestParam(defaultValue = "false") Boolean includePlatforms,
         @RequestParam(required = false) String cursor
     ) {
-        Flux<Streamable> stream = getFeedStream(providerId, feedName, amount, includeAuthors,
+        Flux<StreamElement<?>> stream = getFeedStream(providerId, feedName, amount, includeAuthors,
             includePlatforms, cursor);
 
-        List<Streamable> streamData = stream.collectList().block();
+        List<StreamElement<?>> streamElements = stream.collectList().block();
 
         List<OneFeedContentResponse> content = new ArrayList<>();
         PlatformResponse platform = null;
@@ -179,8 +184,8 @@ public class FeedController {
         FeedCursorResponse nextCursor = null;
 
         // Organize the data
-        for (Streamable streamDataObj : streamData) {
-            switch (streamDataObj) {
+        for (StreamElement<?> streamElement : streamElements) {
+            switch (streamElement.getData()) {
                 case OneFeedContentResponse c:
                     content.add(c);
                     break;

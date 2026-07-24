@@ -1,5 +1,7 @@
 package dev.jqb.onefeed.server.response.std;
 
+import dev.jqb.onefeed.server.response.Streamable;
+
 /**
  * A {@link dev.jqb.onefeed.core.feed.FeedCursor} to send to a client of OneFeed
  *
@@ -9,5 +11,11 @@ package dev.jqb.onefeed.server.response.std;
  *                         offset of 3 indicates content piece 14 should be the first piece to
  *                         consider.
  */
-public record FeedCursorResponse(String cursorOnPlatform, int offsetFromCursor) implements Streamable {
+public record FeedCursorResponse(String cursorOnPlatform, int offsetFromCursor) implements
+    Streamable {
+
+    @Override
+    public String getDisplayType() {
+        return "CURSOR";
+    }
 }

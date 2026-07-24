@@ -1,6 +1,6 @@
 package dev.jqb.onefeed.server.response.std;
 
-import dev.jqb.onefeed.core.platform.ExternalRef;
+import dev.jqb.onefeed.server.response.Streamable;
 
 /**
  * A {@link dev.jqb.onefeed.core.actor.OneFeedActor} sent to a client of OneFeed
@@ -20,4 +20,8 @@ public record OneFeedActorResponse(
     String profilePicSrc
 ) implements Streamable {
 
+    @Override
+    public String getDisplayType() {
+        return "ACTOR";
+    }
 }

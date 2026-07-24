@@ -1,8 +1,7 @@
 package dev.jqb.onefeed.server.response.std;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dev.jqb.onefeed.core.feed.FeedAttribution;
-import dev.jqb.onefeed.core.platform.ExternalRef;
+import dev.jqb.onefeed.server.response.Streamable;
 import java.time.Instant;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -39,4 +38,8 @@ public record OneFeedContentResponse(
     int primaryReactionCount
 ) implements Streamable {
 
+    @Override
+    public String getDisplayType() {
+        return "CONTENT";
+    }
 }

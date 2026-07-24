@@ -1,6 +1,7 @@
 package dev.jqb.onefeed.server.author;
 
 import dev.jqb.onefeed.core.actor.ActorKey;
+import dev.jqb.onefeed.server.response.StreamElement;
 import dev.jqb.onefeed.server.response.std.OneFeedActorResponse;
 import dev.jqb.onefeed.server.response.std.StdResponseMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,12 +58,14 @@ public class AuthorController {
      * @see ActorKey
      */
     @GetMapping("/stream")
-    public Flux<OneFeedActorResponse> getAuthorsStream(
+    public Flux<StreamElement<OneFeedActorResponse>> getAuthorsStream(
         @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
         List<ActorKey> actorKeys = authorKeys.stream().map(ActorKey::fromKeyString).toList();
         Set<ActorKey> uniqueKeys = Set.copyOf(actorKeys);
-        return authorService.getAuthors(uniqueKeys).map(responseMapper::toOneFeedActorResponse);
+        return authorService.getAuthors(uniqueKeys)
+            .map(responseMapper::toOneFeedActorResponse)
+            .map(StreamElement::new);
     }
 
     /**
@@ -76,9 +79,10 @@ public class AuthorController {
     public Map<ActorKey, OneFeedActorResponse> getAuthorsMap(
         @RequestParam @Size(min = 1) List<String> authorKeys
     ) {
-        List<OneFeedActorResponse> authors = getAuthorsStream(authorKeys).collectList().block();
+        List<StreamElement<OneFeedActorResponse>> authors = getAuthorsStream(authorKeys).collectList().block();
         Map<ActorKey, OneFeedActorResponse> authorMap = new HashMap<>();
-        for (OneFeedActorResponse author : authors) {
+        for (StreamElement<OneFeedActorResponse> authorElement : authors) {
+            OneFeedActorResponse author = authorElement.getData();
             authorMap.put(new ActorKey(author.providerId(), author.externalRef().id()), author);
         }
         return authorMap;
