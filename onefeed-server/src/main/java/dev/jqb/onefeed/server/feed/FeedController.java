@@ -213,8 +213,7 @@ public class FeedController {
      * @param feedName the name of the feed whose content to retrieve
      * @param request the HTTP request, used to get the root URL
      *
-     * @return a complete batch of content and authors representing the desired data from the given
-     * feed
+     * @return an RSS XML document representing the desired feed
      */
     @GetMapping(path="{providerId}/{feedName}/rss", produces=MediaType.APPLICATION_RSS_XML_VALUE)
     public Rss2File getFeedRss(
