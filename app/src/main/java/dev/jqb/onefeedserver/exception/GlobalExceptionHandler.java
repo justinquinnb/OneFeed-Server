@@ -1,8 +1,7 @@
 package dev.jqb.onefeedserver.exception;
 
+import dev.jqb.onefeed.core.aggregation.MalformedAggregateCursorException;
 import dev.jqb.onefeed.core.feed.MalformedFeedIdException;
-import dev.jqb.onefeed.core.feed.UnknownFeedIdException;
-import dev.jqb.onefeedserver.aggregation.MalformedAggregateCursorException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import org.slf4j.Logger;

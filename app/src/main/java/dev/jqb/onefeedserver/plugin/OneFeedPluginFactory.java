@@ -1,8 +1,7 @@
 package dev.jqb.onefeedserver.plugin;
 
-import dev.jqb.onefeed.core.plugin.PluginConfigsFile;
-import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
-import dev.jqb.onefeed.core.provider.ProviderConfig;
+import dev.jqb.onefeedserver.providerpluginsdk.ProviderConfig;
+import dev.jqb.onefeedserver.providerpluginsdk.ProviderPlugin;
 import java.lang.reflect.Constructor;
 import org.pf4j.DefaultPluginFactory;
 import org.pf4j.Plugin;
@@ -31,7 +30,7 @@ public class OneFeedPluginFactory extends DefaultPluginFactory {
     protected Plugin createInstance(Class<?> pluginClass, PluginWrapper pluginWrapper) {
         try {
             // Pass the provider env map to the class if it's a plugin provider
-            if (OneFeedProviderPlugin.class.isAssignableFrom(pluginClass)) {
+            if (ProviderPlugin.class.isAssignableFrom(pluginClass)) {
                 ProviderConfig pluginEnv = pluginConfigsFile.getProviderConfigs()
                     .get(pluginWrapper.getPluginId());
 

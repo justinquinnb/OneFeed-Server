@@ -1,7 +1,7 @@
 package dev.jqb.onefeedserver.plugin;
 
 import dev.jqb.onefeed.core.content.Content;
-import dev.jqb.onefeed.core.plugin.OneFeedPlugin;
+import dev.jqb.onefeedserver.pluginsdk.core.OneFeedPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,8 @@
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import dev.jqb.onefeed.core.actor.Actor;
-import dev.jqb.onefeed.core.caching.Cacher;
 import dev.jqb.onefeed.core.content.Content;
+import dev.jqb.onefeedserver.cacherpluginsdk.Cacher;
 import dev.jqb.onefeedserver.cacherpluginsdk.CacherPlugin;
 import dev.jqb.onefeedserver.pluginsdk.test.OneFeedPluginTests;
 import java.util.List;

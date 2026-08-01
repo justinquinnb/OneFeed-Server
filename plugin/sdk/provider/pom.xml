@@ -51,4 +51,16 @@
       <artifactId>assertj-core</artifactId>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>dev.jqb.onefeedserver</groupId>
+        <artifactId>onefeed-server-bom</artifactId>
+        <scope>import</scope>
+        <type>pom</type>
+        <version>${revision}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>

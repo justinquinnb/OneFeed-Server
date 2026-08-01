@@ -1,9 +1,9 @@
 package dev.jqb.onefeedserver.author;
 
 import dev.jqb.onefeed.core.actor.ActorKey;
-import dev.jqb.onefeedserver.response.StreamElement;
-import dev.jqb.onefeedserver.response.std.OneFeedActorResponse;
-import dev.jqb.onefeedserver.response.std.StdResponseMapper;
+import dev.jqb.onefeed.mapper.json.OneFeedActorResponse;
+import dev.jqb.onefeed.mapper.json.StdResponseMapper;
+import dev.jqb.onefeed.mapper.json.StreamElement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
 import java.util.HashMap;

@@ -6,7 +6,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * Provides the task scheduler bean, which is used to handle execution of
- * {@link dev.jqb.onefeed.core.plugin.ScheduledTask}s
+ * {@link dev.jqb.onefeedserver.pluginsdk.task.ScheduledTask}s
  */
 @Configuration
 public class ThreadPoolTaskSchedulerConfig {

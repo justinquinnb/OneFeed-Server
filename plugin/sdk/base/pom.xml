@@ -50,8 +50,8 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>dev.jqb.onefeed</groupId>
-        <artifactId>onefeed-bom</artifactId>
+        <groupId>dev.jqb.onefeedserver</groupId>
+        <artifactId>onefeed-server-bom</artifactId>
         <scope>import</scope>
         <type>pom</type>
         <version>${revision}</version>

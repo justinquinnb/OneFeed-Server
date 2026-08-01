@@ -1,13 +1,13 @@
 package dev.jqb.onefeedserver.plugin;
 
 import dev.jqb.onefeed.core.actor.OneFeedActor;
-import dev.jqb.onefeed.core.caching.Cacher;
-import dev.jqb.onefeed.core.caching.OneFeedCacherPlugin;
 import dev.jqb.onefeed.core.content.OneFeedContent;
-import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
 import dev.jqb.onefeedserver.aggregation.AggregationService;
 import dev.jqb.onefeedserver.author.AuthorService;
+import dev.jqb.onefeedserver.cacherpluginsdk.Cacher;
+import dev.jqb.onefeedserver.cacherpluginsdk.CacherPlugin;
 import dev.jqb.onefeedserver.provider.ProviderRegistry;
+import dev.jqb.onefeedserver.providerpluginsdk.ProviderPlugin;
 import dev.jqb.onefeedserver.tasks.TaskRegistry;
 import org.pf4j.PluginState;
 import org.pf4j.PluginStateEvent;
@@ -48,15 +48,15 @@ public class OneFeedPluginStateListener implements PluginStateListener {
             typeRegistry.registerTypesFrom(wrapper);
 
             Class<?> pluginClass = wrapper.getPlugin().getClass();
-            if (OneFeedProviderPlugin.class.isAssignableFrom(pluginClass)) {
-                OneFeedProviderPlugin plugin = (OneFeedProviderPlugin) wrapper.getPlugin();
+            if (ProviderPlugin.class.isAssignableFrom(pluginClass)) {
+                ProviderPlugin plugin = (ProviderPlugin) wrapper.getPlugin();
                 providerRegistry.register(plugin.getProvider());
-            } else if (OneFeedCacherPlugin.class.isAssignableFrom(pluginClass)) {
+            } else if (CacherPlugin.class.isAssignableFrom(pluginClass)) {
                 if (aggregationService.getCache() != null) {
                     throw new IllegalStateException("Cannot register multiple cachers");
                 }
 
-                OneFeedCacherPlugin plugin = (OneFeedCacherPlugin) wrapper.getPlugin();
+                CacherPlugin plugin = (CacherPlugin) wrapper.getPlugin();
 
                 // TODO improve below lines if possible
                 // Rn, this means things'll break if OFContent or OFActors aren't being used as the
@@ -71,9 +71,9 @@ public class OneFeedPluginStateListener implements PluginStateListener {
             taskRegistry.deregisterPluginTasks(wrapper.getPluginId());
 
             Class<?> pluginClass = wrapper.getPlugin().getClass();
-            if (OneFeedProviderPlugin.class.isAssignableFrom(pluginClass)) {
+            if (ProviderPlugin.class.isAssignableFrom(pluginClass)) {
                 providerRegistry.deregister(wrapper.getPluginId());
-            } else if (OneFeedCacherPlugin.class.isAssignableFrom(pluginClass)) {
+            } else if (CacherPlugin.class.isAssignableFrom(pluginClass)) {
                 aggregationService.setCache(null);
                 authorService.setCache(null);
             }

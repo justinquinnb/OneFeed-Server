@@ -1,7 +1,7 @@
-package dev.jqb.onefeedserver.pluginsdk.core;
+package dev.jqb.onefeedserver.plugin;
 
-import dev.jqb.onefeed.core.caching.CacherConfig;
-import dev.jqb.onefeed.core.provider.ProviderConfig;
+import dev.jqb.onefeedserver.cacherpluginsdk.CacherConfig;
+import dev.jqb.onefeedserver.providerpluginsdk.ProviderConfig;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

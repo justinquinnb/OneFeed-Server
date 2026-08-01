@@ -1,8 +1,7 @@
 package dev.jqb.onefeedserver.plugin;
 
-import dev.jqb.onefeed.core.caching.OneFeedCacherPlugin;
-import dev.jqb.onefeed.core.plugin.PluginConfigsFile;
-import dev.jqb.onefeed.core.provider.OneFeedProviderPlugin;
+import dev.jqb.onefeedserver.cacherpluginsdk.CacherPlugin;
+import dev.jqb.onefeedserver.providerpluginsdk.ProviderPlugin;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -22,23 +21,23 @@ public class OneFeedPluginManager extends DefaultPluginManager {
     }
 
     /**
-     * Gets a list of all {@link PluginState#RESOLVED} {@link OneFeedProviderPlugin}s.
-     * @return a list of all {@link PluginState#RESOLVED} {@link OneFeedProviderPlugin}s
+     * Gets a list of all {@link PluginState#RESOLVED} {@link ProviderPlugin}s.
+     * @return a list of all {@link PluginState#RESOLVED} {@link ProviderPlugin}s
      */
     public List<PluginWrapper> getProviders() {
         return getPlugins().stream()
-            .filter(p -> p.getPlugin() instanceof OneFeedProviderPlugin).toList();
+            .filter(p -> p.getPlugin() instanceof ProviderPlugin).toList();
     }
 
     /**
-     * Gets the first {@link PluginState#RESOLVED} {@link OneFeedCacherPlugin} found in the plugin
+     * Gets the first {@link PluginState#RESOLVED} {@link CacherPlugin} found in the plugin
      * manager.
-     * @return the first {@link PluginState#RESOLVED} {@link OneFeedCacherPlugin} found in the
+     * @return the first {@link PluginState#RESOLVED} {@link CacherPlugin} found in the
      * plugin manager
      */
     public PluginWrapper getCacher() {
         return getPlugins().stream()
-            .filter(p -> p.getPlugin() instanceof OneFeedCacherPlugin)
+            .filter(p -> p.getPlugin() instanceof CacherPlugin)
             .toList().getFirst();
     }
 }

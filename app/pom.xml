@@ -48,6 +48,26 @@
             <artifactId>onefeed-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>dev.jqb.onefeed</groupId>
+            <artifactId>onefeed-json-mapper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.jqb.onefeedserver</groupId>
+            <artifactId>onefeed-server-plugin-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.jqb.onefeedserver</groupId>
+            <artifactId>onefeed-server-cacher-plugin-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.jqb.onefeedserver</groupId>
+            <artifactId>onefeed-server-provider-plugin-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.jqb.onefeed</groupId>
+            <artifactId>onefeed-rss-mapper</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
             <version>3.2.0</version>
@@ -89,11 +109,6 @@
             <artifactId>therapi-runtime-javadoc</artifactId>
             <version>0.15.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>1.6.3</version>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -106,11 +121,11 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>dev.jqb.onefeed</groupId>
-                <artifactId>onefeed-bom</artifactId>
-                <version>0.4.0-SNAPSHOT</version>
-                <type>pom</type>
+                <groupId>dev.jqb.onefeedserver</groupId>
+                <artifactId>onefeed-server-bom</artifactId>
                 <scope>import</scope>
+                <type>pom</type>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,6 +1,5 @@
 package dev.jqb.onefeedserver.plugin;
 
-import dev.jqb.onefeed.core.plugin.PluginConfigsFile;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.nio.file.Files;
 import java.nio.file.Path;

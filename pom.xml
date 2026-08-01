@@ -18,11 +18,12 @@
   </properties>
 
   <modules>
-    <module>server</module>
+    <module>app</module>
     <module>plugin/sdk/provider</module>
     <module>plugin/sdk/cacher</module>
     <module>plugin/sdk/base</module>
     <module>plugin/compat/rss</module>
+    <module>bom</module>
   </modules>
 
   <parent>
