@@ -1,5 +1,6 @@
 # OneFeed Server
-*A reactive content feed abstraction server made with Spring Boot*
+*A reactive content feed abstraction server made with Spring Boot*<br>
+See also: [OneFeed](https://github.com/justinquinnb/OneFeed)
 
 ## About
 Say goodbye to dated standards, clunky APIs, and bloated DTOs. OneFeed Server standardizes reading 
